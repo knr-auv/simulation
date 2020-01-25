@@ -20,7 +20,7 @@ Client interact with simulation via 2 diffrent channels for video and control. A
 ##### Without data
 
 | Packet type | 
-| ----------- |
+| ----------- |	
 | 1 byte |
 
 ### Video feed
@@ -45,7 +45,7 @@ Packet type bytes are groped by activity they are connected with:
 | Byte | Abbreviation | Description | JSON from client | JSON from server | Working |
 | ---- | ------------ | ------------| ---------------- | ---------------- | ------- | 
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
-| `0xA1` | [ARM_MTR](#ARM_MTR) | Set motor power |  | ```{accel, gyro, baro}``` | 
+| `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
 | `0xB0` | [GET_SENS](#GET_SENS)	| Get sensors read outs	|  | `{accel, gyro, baro}` |
 | `0xC0` | [SET_SIM](#SET_SIM) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ACK) | Acknowledgement |  |  |

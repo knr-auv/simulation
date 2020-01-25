@@ -64,7 +64,6 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\CameraScript.cs" />
-    <Compile Include="Assets\Scripts\CameraStream.cs" />
     <Compile Include="Assets\Scripts\CCTVController.cs" />
     <Compile Include="Assets\Scripts\FogEnabled.cs" />
     <Compile Include="Assets\Scripts\JSON.cs" />
