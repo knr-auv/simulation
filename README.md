@@ -23,7 +23,7 @@ Client interact with simulation via 2 diffrent channels for video and control. A
 ### Video feed
 Client send request packet and server responds with JPG encoded video frame.
 | Byte | Abbreviation | Description |
-| ---- | ------------ | ---------------|
+| ---- | ------------ | ----------- |
 | `0x69` | [GET_VID](#set_mtr) | Request video frame |
 
 ### Simulation control
