@@ -11,20 +11,24 @@ AUV robot simulation built in [Unity](https://unity.com/). Project includes:
 ## Networking
 Client interact with simulation via 2 diffrent channels for video and control. All packets are `TCP/IP`.
 ### Packet structure
+
 ##### With data
+
 | Packet type | Data length as int32 | Data |
 | ----------- | -------------------- | ---- | 
 | 1 byte | 4 bytes | n bytes |
 ##### Without data
+
 | Packet type | 
 | ----------- |
 | 1 byte |
 
 ### Video feed
 Client send request packet and server responds with JPG encoded video frame.
+
 | Byte | Abbreviation | Description |
 | ---- | ------------ | ----------- |
-| `0x69` | [GET_VID](#set_mtr) | Request video frame |
+| `0x69` | GET_VID | Request video frame |
 
 ### Simulation control
 This channel is responsible for controling simulation: steering the robot, recording data etc. Not all dataframes include data so see [packets structure](#packet-structure). All data is in JSON format. All packets types are listed in the table below.
