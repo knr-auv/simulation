@@ -1,5 +1,5 @@
 # AUV Simulation
-AUV robot simulation built in [Unity](https://unity.com/). Project includes:
+AUV robot simulation built in [Unity](https://unity.com/) 2019.2.0f1. Project includes:
 - underwater shaders
     - color correction
     - physical camera setup
@@ -7,6 +7,10 @@ AUV robot simulation built in [Unity](https://unity.com/). Project includes:
 - simple fluid dynamics
     - laminar and dynamic flow
     - buoyancy
+    
+## Table of contents
+- [Networking](#networking)
+- [Important notes](#important-notes)
 
 ## Networking
 Client interact with simulation via 2 diffrent channels for video and control. 
@@ -40,10 +44,10 @@ Packet type bytes are groped by activity they are connected with:
 | ---- | ------------ | ------------| ---------------- | ---------------- | ------- | 
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
-| `0xB0` | [GET_SENS](#GET_SENS)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
+| `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
 | `0xC0` | [SET_SIM](#SET_SIM) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ACK) | Acknowledgement |  |  |
-| `0xC2` | [GET_ORIEN](#GET_ORIEN) | Get Okon’s orientation |  | `{pos, rot}` | YES
+| `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | YES
 | `0xC3` | [SET_ORIEN](#SET_ORIEN) | Set Okon’s orientation |	`{pos, rot}` |  |
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
 | `0xD1` | [REC_ST](#REC_ST) | Stop recording | | |
@@ -52,6 +56,56 @@ Packet type bytes are groped by activity they are connected with:
 | `0xC5` | [PING](#PING) | Send ping to server |	`{timestamp, ping}` | `{timestamp, ping}`
 | `0xC4` | [KILL](#KILL) | Kill the simulation |	| |
 
+---
+
+#### SET_MTR
+
+Packet sets thrusters power and direction. `FL, FR, ML, MR, B` are abbreviations e.g. `FL` `FrontLeft` thruster. Values are in range from `-1.0f` to `1.0f`.  
+JSON structure:  
+- FL
+- FR
+- ML
+- MR
+- B
+
+Example `{"FL":0.1,"FR":-1.0,"ML":0.1,"MR":0.0,"B":0.008}`
+
+#### GET_SENS
+
+Packet requests current values of on-board sensors (*gyroscope*, *accelerometer* and *barometer*). Values `x, y, z` for *gyroscope* are in degrees.  
+JSON structure:
+- gyro
+	- x
+    - y
+    - z
+- accel
+  	- x
+    - y
+    - z
+- baro 
+  - pressure  
+
+Example `{"gyro":{"x":0.0,"y":0.0,"z":0.0},"accel":{"x":-1.8893474690019438e-19,"y":0.001282564247958362,"z":1.6839033465654367e-21},"baro":{"pressure":6462.2197265625}}`
+
+#### GET_ORIEN
+
+Packet requests current orientation of the robot (*rotation* and *position*). *Position* values are in simulation's world coordinates.
+JSON structure:
+- rot
+  	- x
+    - y
+    - z
+- pos
+  	- x
+    - y
+    - z
+
+Example `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":-1.2400000095367432,"y":-0.19980505108833314,"z":-2.7100000381469728}}`
+
+## Important notes
+
+- JSON request must include **all** values.
+- JSON must use `"` character, not `'`.
 
 
 
