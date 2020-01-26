@@ -1,5 +1,5 @@
 # AUV Simulation
-AUV robot simulation built in [Unity](https://unity.com/) 2019.2.0f1. Project includes:
+Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates behaviour of the Okon AUV. Project includes:
 - underwater shaders
     - color correction
     - physical camera setup
@@ -9,8 +9,49 @@ AUV robot simulation built in [Unity](https://unity.com/) 2019.2.0f1. Project in
     - buoyancy
     
 ## Table of contents
+
+- [Simulation](#simulation)
+	- [Fluid dynamics](#fluid-dynamics)
 - [Networking](#networking)
+	- [Packet structure](#packet-structure)
+	- [Video feed](#video-feed)
+	- [Simulation control](#simulation-control)
 - [Important notes](#important-notes)
+
+---
+
+## Simulation
+Simulation was created with Uinty game engine. It simulates behaviour of the Okon AUV.
+
+### Fluid dynamics
+Every object that will be dynamic and is in the water has defined *mass*, *volume*, *fluid dynamics constants*, *center of mass* and *center of volume*. Those variables are needed to calculate correct dynamics in the water.
+
+### Thrusters
+
+Thrusters in simulation have approximated thrust based on [producer charts](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster/). Thrust is approximated with this eqation  
+`ax^3 + bx^2 + cx^2 + d`  
+where parameters are the solution of  
+```
+a*1100^3 + b*1100^2 + c*1100 + d = 4.5
+a*1472^3 + b*1472^2 + c*1472 + d = 0
+a*1528^3 + b*1528^2 + c*1528 + d = 0
+a*1852^3 + b*1852^2 + c*1852 + d = 5.02
+
+a = 1.66352902e-8f
+b = -0.00003994119f
+c = 0.00752234546f
+d = 22.4126993334f
+```
+
+The final function to set the force of the thruster:   
+```cs
+float f(float fill) {
+	float x = Map(fill, -1f, 1f, 1100f, 1900f);
+	if(val > 0) return Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
+	else return -Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
+}
+```
+
 
 ## Networking
 Client interact with simulation via 2 diffrent channels for video and control. 
