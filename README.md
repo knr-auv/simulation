@@ -94,7 +94,7 @@ Packet type bytes are groped by activity they are connected with:
 | `0xD1` | [REC_ST](#REC_ST) | Stop recording | | |
 | `0xD2` | [REC_RST](#_RST) | Reset and clear recording | | |
 | `0xD3` | [GET_REC](#GET_REC) | Get recorded data | | *Array of pos and dir*
-| `0xC5` | [PING](#PING) | Send ping to server |	`{timestamp, ping}` | `{timestamp, ping}`
+| `0xC5` | [PING](#ping) | Send ping to server |	`{timestamp, ping}` | `{timestamp, ping}` | YES
 | `0xC4` | [KILL](#KILL) | Kill the simulation |	| |
 
 ---
@@ -109,7 +109,7 @@ JSON structure:
 - MR
 - B
 
-Example `{"FL":0.1,"FR":-1.0,"ML":0.1,"MR":0.0,"B":0.008}`
+Example request`{"FL":0.1,"FR":-1.0,"ML":0.1,"MR":0.0,"B":0.008}`
 
 #### GET_SENS
 
@@ -126,7 +126,7 @@ JSON structure:
 - baro 
   - pressure  
 
-Example `{"gyro":{"x":0.0,"y":0.0,"z":0.0},"accel":{"x":-1.8893474690019438e-19,"y":0.001282564247958362,"z":1.6839033465654367e-21},"baro":{"pressure":6462.2197265625}}`
+Example response `{"gyro":{"x":0.0,"y":0.0,"z":0.0},"accel":{"x":-1.8893474690019438e-19,"y":0.001282564247958362,"z":1.6839033465654367e-21},"baro":{"pressure":6462.2197265625}}`
 
 #### GET_ORIEN
 
@@ -141,7 +141,16 @@ JSON structure:
     - y
     - z
 
-Example `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":-1.2400000095367432,"y":-0.19980505108833314,"z":-2.7100000381469728}}`
+Example response `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":-1.2400000095367432,"y":-0.19980505108833314,"z":-2.7100000381469728}}`
+
+#### PING
+
+Packet allow to measure ping between client and simulation. Client sends only own *timestamp* (UNIX time stamp milliseconds) leaving *ping* equal to 0. Server responses with *timestamp* (also UNIX milliseconds) of received packet and value of the ping.  
+JSON structure:
+- timestamp
+- ping
+
+Example response `{"timestamp":637156806029701490,"ping":11}`
 
 ## Important notes
 
