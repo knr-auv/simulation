@@ -3,21 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static JSON;
-/// <summary>
-/// Fwyporu
-/// opory T1 T2
-/// opory rot
-/// </summary>
+
 public class OkonController : MonoBehaviour
 {
-    private Rigidbody _rb;
+    private Rigidbody rb;
     public GameObject motorFL, motorFR, motorML, motorMR, motorB;//ForwardLefy MiddleLeft
     public MotorController FL, FR, ML, MR, B;
 
-    UInt16 frame = 0;
-
     public Vector3 mFlpos, mFRpos, mMLpos, mMRpos, mBpos, mFldir, mFRdir, mMLdir, mMRdir, mBdir;
-
+    public Orientation orientation = new Orientation();
+    public Sensors sensors = new Sensors();
+    public Vector3 acceleration = new Vector3(), lastVelocity = new Vector3();
     void Start()
     {
         ML = motorML.GetComponent<MotorController>();
@@ -25,11 +21,31 @@ public class OkonController : MonoBehaviour
         FL = motorFL.GetComponent<MotorController>();
         FR = motorFR.GetComponent<MotorController>();
         B = motorB.GetComponent<MotorController>();
-    }
+        rb = GetComponent<Rigidbody>();
 
+    }
+    
     void FixedUpdate()
     {
-        return;
+        orientation.pos.x = transform.position.x;
+        orientation.pos.y = transform.position.y;
+        orientation.pos.z = transform.position.z;
+        orientation.rot.x = transform.rotation.eulerAngles.x;
+        orientation.rot.y = transform.rotation.eulerAngles.y;
+        orientation.rot.z = transform.rotation.eulerAngles.z;
+
+        acceleration = (rb.velocity - lastVelocity) / Time.fixedDeltaTime;//TODO correct XYZ axis order
+        lastVelocity = rb.velocity;
+        sensors.accel.x = acceleration.x;
+        sensors.accel.y = acceleration.y;
+        sensors.accel.z = acceleration.z;
+
+        sensors.baro.pressure = -transform.position.y*1000f*9.8f;
+
+        sensors.gyro.x = orientation.rot.x;
+        sensors.gyro.y = orientation.rot.y;
+        sensors.gyro.z = orientation.rot.z;
+        /*return;;
         float verticalInput = Input.GetAxis("Vertical");
         float horizontalInput = Input.GetAxis("Horizontal");
 
@@ -55,7 +71,7 @@ public class OkonController : MonoBehaviour
             FR.fill = 0f;
             B.fill = 0f;
         }
-        #endregion
+        #endregion*/
     }
 
     void OnDrawGizmosSelected()
@@ -66,16 +82,11 @@ public class OkonController : MonoBehaviour
 
     public Sensors GetSensors()
     {
-        Sensors s = new Sensors();
-        return s;
+        return sensors;
     }
 
     public Orientation GetOrientation()
     {
-        Orientation o = new Orientation();
-        o.rot.x = transform.rotation.ToEulerAngles().x;
-        o.rot.y = transform.rotation.ToEulerAngles().y;
-        o.rot.z = transform.rotation.ToEulerAngles().z;
-        return o;
+        return orientation;
     }
 }

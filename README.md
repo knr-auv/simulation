@@ -9,19 +9,13 @@ AUV robot simulation built in [Unity](https://unity.com/). Project includes:
     - buoyancy
 
 ## Networking
-Client interact with simulation via 2 diffrent channels for video and control. All packets are `TCP/IP`.
+Client interact with simulation via 2 diffrent channels for video and control. 
 ### Packet structure
-
-##### With data
+All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.
 
 | Packet type | Data length as int32 | Data |
 | ----------- | -------------------- | ---- | 
 | 1 byte | 4 bytes | n bytes |
-##### Without data
-
-| Packet type | 
-| ----------- |	
-| 1 byte |
 
 ### Video feed
 Client send request packet and server responds with JPG encoded video frame.
@@ -46,11 +40,11 @@ Packet type bytes are groped by activity they are connected with:
 | ---- | ------------ | ------------| ---------------- | ---------------- | ------- | 
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
-| `0xB0` | [GET_SENS](#GET_SENS)	| Get sensors read outs	|  | `{accel, gyro, baro}` |
+| `0xB0` | [GET_SENS](#GET_SENS)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
 | `0xC0` | [SET_SIM](#SET_SIM) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ACK) | Acknowledgement |  |  |
-| `0xC2` | [GET_POS](#GET_POS) | Get Okon’s position |  | `{pos, rot}` | 
-| `0xC3` | [SET_POS](#SET_POS) | Set Okon’s position |	`{pos, rot}` |  |
+| `0xC2` | [GET_ORIEN](#GET_ORIEN) | Get Okon’s orientation |  | `{pos, rot}` | YES
+| `0xC3` | [SET_ORIEN](#SET_ORIEN) | Set Okon’s orientation |	`{pos, rot}` |  |
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
 | `0xD1` | [REC_ST](#REC_ST) | Stop recording | | |
 | `0xD2` | [REC_RST](#_RST) | Reset and clear recording | | |

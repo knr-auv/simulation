@@ -15,7 +15,7 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        transform.position = okonPos.position + new Vector3(.5f, .5f, .5f);
+        //transform.position = okonPos.position + new Vector3(.5f, .5f, .5f);
         /*
         if (Input.GetMouseButtonDown(0))Cursor.lockState = CursorLockMode.Locked;
         if (Input.GetMouseButtonDown(1))Cursor.lockState = CursorLockMode.None;
