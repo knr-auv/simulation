@@ -39,7 +39,8 @@ public class SimulationBehaviour : MonoBehaviour
         REC_STRT = 0xD0,
         REC_ST = 0xD1,
         REC_RST = 0xD2,
-        GE_REC = 0xD3
+        GE_REC = 0xD3,
+        PING = 0xC5
     }
 
     void Start()
@@ -127,6 +128,13 @@ public class SimulationBehaviour : MonoBehaviour
                                 json2send = (JsonUtility.ToJson(okonController.GetSensors()));
                                 Debug.Log(json2send);
                                 SendJson(Packet.GET_SENS, json2send);
+                                break;
+                            case Packet.PING:
+                                JSON.Ping ping = new JSON.Ping();
+                                TryJsonToObject(jsonFromClient, ping);
+                                ping.ping = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond - ping.timestamp;
+                                ping.timestamp = System.DateTime.Now.Ticks;
+                                SendJson(Packet.PING, JsonUtility.ToJson(ping));
                                 break;
                             case (Packet)0xFF:
                                 nwStream.Dispose();

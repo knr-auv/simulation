@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class JSON
 {
-    [System.Serializable]
     public class Motors
     {
         public float FL, FR, ML, MR, B;
     }
 
-    [System.Serializable]
     public class Sensors
     {
         [System.Serializable]
@@ -33,20 +31,18 @@ public class JSON
         public Baro baro = new Baro();
     }
 
-    [System.Serializable]
     public class Settings
     {
         public int quality;
     }
 
-    [System.Serializable]
     public class Connection
     {
         int timestamp;
         int ping;
     }
 
-    [System.Serializable]
+    
     public class Orientation
     {
         [System.Serializable]
@@ -61,5 +57,10 @@ public class JSON
         }
         public Rot rot = new Rot();
         public Pos pos = new Pos();
+    }
+
+    public class Ping
+    {
+        public long timestamp, ping;
     }
 }
