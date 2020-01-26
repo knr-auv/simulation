@@ -5,10 +5,8 @@ using UnityEngine;
 public class MotorController : MonoBehaviour
 {
     Rigidbody rb;
-    public float maxForce = 22.4f;
     public float fill = 0f;
-    public float name;
-    private float a = 1.66352902e-8f, b = -0.00003994119f, c = 0.00752234546f, d = 22.4126993334f;
+    private readonly float a = 1.66352902e-8f, b = -0.00003994119f, c = 0.00752234546f, d = 22.4126993334f;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -16,11 +14,10 @@ public class MotorController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if(Mathf.Abs(fill)<=1f && transform.position.y < 0) rb.AddForce(transform.forward*maxForce*fill, ForceMode.Force); //linear force
         if(Mathf.Abs(fill)<=1f && transform.position.y < 0) rb.AddForce(transform.forward*f(fill)*9.8065f, ForceMode.Force); //aprox. force
     }
 
-    private float f(float val)
+     private float f(float val)
     {
         float x = Map(val, -1f, 1f, 1100f, 1900f);
         if(val > 0) return Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);

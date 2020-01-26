@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    /*
     float mainSpeed = 10.0f; //regular speed
     float shiftAdd = 250.0f; //multiplied by how long shift is held.  Basically running
     float maxShift = 100.0f; //Maximum speed when holdin gshift
@@ -60,7 +61,7 @@ public class CameraController : MonoBehaviour
         {
             transform.Translate(p);
         }
-        */
+        *//*
     }
 
     private Vector3 GetBaseInput()
@@ -83,5 +84,5 @@ public class CameraController : MonoBehaviour
             p_Velocity += new Vector3(1, 0, 0);
         }
         return p_Velocity;
-    }
+    }*/
 }

@@ -7,7 +7,7 @@ public class WaterBehaviour : MonoBehaviour
     public float volume, K1, K2, K1Rot, K2Rot, waterDensity, gravityConstant;
     public Vector3 massCenterOffset = Vector3.zero, volumeCenterOffset = Vector3.zero;
     public bool drawGizmos = true;
-    private Rigidbody rigidbody;
+    private new Rigidbody rigidbody;
 
     void Start()
     {

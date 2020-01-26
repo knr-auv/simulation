@@ -12,7 +12,7 @@ public class SimulationBehaviour : MonoBehaviour
     [SerializeField]
     private static int _jsonPort = 44210;
     [SerializeField]
-    private int quality;
+    private int quality = 85;
     [SerializeField]
     private bool onbool = false;
     [SerializeField]
@@ -27,6 +27,7 @@ public class SimulationBehaviour : MonoBehaviour
     private bool _swxh = true;
     private Motors _motors = new Motors();
     private OkonController okonController;
+    private float _fps = 0;
 
     private enum Packet : byte{
         SET_MTR = 0xA0,
@@ -72,6 +73,7 @@ public class SimulationBehaviour : MonoBehaviour
             _newImage = _tex.EncodeToJPG(quality);
             _swxh = true;
         }
+        _fps = 1f / Time.deltaTime;
     }
 
     private void JsonRecv()
@@ -109,7 +111,6 @@ public class SimulationBehaviour : MonoBehaviour
                         {
                             case Packet.SET_MTR://motors Json
                                 Debug.Log("From client: " + jsonFromClient);
-                                Debug.Log(JsonUtility.ToJson(_motors));
                                 TryJsonToObject(jsonFromClient, _motors);
                                 okonController.FL.fill = _motors.FL;
                                 okonController.FR.fill = _motors.FR;
@@ -137,11 +138,11 @@ public class SimulationBehaviour : MonoBehaviour
                                 Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packet }));
                                 break;
                         }
-                        SendJson(Packet.ACK, "{}");
+                        SendJson(Packet.ACK, "{\"fps\":" +Mathf.Round(_fps).ToString() + "}");
                     }
-                    catch
+                    catch(System.Exception exp)
                     {
-                        Debug.Log("Json client crashed");
+                        Debug.Log("Json client crashed " + exp.Message);
                         nwStream?.Close();
                         nwStream?.Dispose();
                         client?.Close();
@@ -174,7 +175,6 @@ public class SimulationBehaviour : MonoBehaviour
             Debug.Log("Wrong JSON for " + obj.GetType().ToString());
         }
     }
-
 
     private void VideoRecv()
     {
@@ -231,7 +231,7 @@ public class SimulationBehaviour : MonoBehaviour
                 }   
             }catch(SocketException exc)
             {
-                Debug.Log("Video client disconnected");
+                Debug.Log("Video client disconnected" + exc.Message);
             }
             catch(System.Exception exp)
             {
@@ -242,8 +242,8 @@ public class SimulationBehaviour : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        _videoRecv.Abort();
-        _jsonRecv.Abort();
+        _videoRecv?.Abort();
+        _jsonRecv?.Abort();
         Debug.Log("Simulation halted");
     }
 
