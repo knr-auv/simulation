@@ -89,7 +89,7 @@ Packet type bytes are groped by activity they are connected with:
 | `0xC0` | [SET_SIM](#SET_SIM) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ACK) | Acknowledgement |  |  |
 | `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | YES
-| `0xC3` | [SET_ORIEN](#SET_ORIEN) | Set Okon’s orientation |	`{pos, rot}` |  |
+| `0xC3` | [SET_ORIEN](#set_orien) | Set Okon’s orientation |	`{pos, rot}` |  |
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
 | `0xD1` | [REC_ST](#REC_ST) | Stop recording | | |
 | `0xD2` | [REC_RST](#_RST) | Reset and clear recording | | |
@@ -143,6 +143,21 @@ JSON structure:
 
 Example response `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":-1.2400000095367432,"y":-0.19980505108833314,"z":-2.7100000381469728}}`
 
+#### SET_ORIEN
+
+Packet allows to set *position* and *rotation* of the robot in simulation's world space. *Rotation* values are in degrees.  
+JSON structure:  
+- rot
+  	- x
+    - y
+    - z
+- pos
+  	- x
+    - y
+    - z
+
+Example request `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":1.0900000095367432,"y":-0.89980505108833314,"z":-2.7100000381469728}}`
+
 #### PING
 
 Packet allow to measure ping between client and simulation. Client sends only own *timestamp* (UNIX time stamp milliseconds) leaving *ping* equal to 0. Server responses with *timestamp* (also UNIX milliseconds) of received packet and value of the ping.  
@@ -151,6 +166,7 @@ JSON structure:
 - ping
 
 Example response `{"timestamp":637156806029701490,"ping":11}`
+
 
 ## Important notes
 
