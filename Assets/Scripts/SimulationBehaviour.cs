@@ -45,6 +45,20 @@ public class SimulationBehaviour : MonoBehaviour
 
     void Start()
     {
+        try
+        {
+            string jsonSettings = System.IO.File.ReadAllText("settings.json");
+            Init init = new Init();
+            TryJsonToObject(jsonSettings, init);
+            _videoPort = init.videoPort;
+            _jsonPort = init.jsonPort;
+            quality = init.quality;
+        }
+        catch
+        {
+            _videoPort = 44209;
+            _jsonPort = 44210;
+        }
         _tex = new Texture2D(okonTex.width, okonTex.height, TextureFormat.RGB24, false);
         okonController = Okon.GetComponent<OkonController>();
         _videoRecv = new Thread(VideoRecv);
@@ -53,11 +67,6 @@ public class SimulationBehaviour : MonoBehaviour
         _jsonRecv.IsBackground = true;
         _videoRecv.Start();
         _jsonRecv.Start();
-    }
-
-    private void FixedUpdate()
-    {
-        
     }
 
     private void Update()
@@ -161,7 +170,7 @@ public class SimulationBehaviour : MonoBehaviour
             nwStream?.Dispose();
             client?.Dispose();
             Debug.Log("Json client disconnected");
-            //TODO repair disconnecting
+
             void SendJson(Packet packetType, string json)
             {
                 byte[] bytes = Encoding.ASCII.GetBytes(json);
@@ -194,7 +203,7 @@ public class SimulationBehaviour : MonoBehaviour
         {
             TcpClient client = listener.AcceptTcpClient();
             NetworkStream nwStream = client.GetStream();
-            byte[] buffer = new byte[client.ReceiveBufferSize];
+            byte packetType;
             bool clientConnected = true;
             Debug.Log("Video client connected");
             try
@@ -203,7 +212,7 @@ public class SimulationBehaviour : MonoBehaviour
                 {
                     try
                     {
-                        int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+                        packetType = (byte)nwStream.ReadByte();
                     }
                     catch
                     {
@@ -212,7 +221,7 @@ public class SimulationBehaviour : MonoBehaviour
                         break;
                     }
 
-                    switch (buffer[0])
+                    switch (packetType)
                     {
                         case 0x69:
                             _image = _newImage;
@@ -220,20 +229,14 @@ public class SimulationBehaviour : MonoBehaviour
                             nwStream.Write(System.BitConverter.GetBytes(_image.Length), 0, 4);
                             nwStream.Write(_image, 0, _image.Length);
                             break;
-                        case 0x64://Client CLose connection 'd'
-                            Debug.Log("Video client disconnected");
-                            client.Close();
-                            clientConnected = false;
-                            break;
-                        case 0x66://Stop thread 'f'
-                            _videoRecv.Abort();
-                            Application.Quit();
-                            break;
                         case 0x00:
                             clientConnected = false;
                             break;
+                        case 0xFF:
+                            clientConnected = false;
+                            break;
                         default:
-                            Debug.Log(System.BitConverter.ToString(new byte[] { buffer[0] }));
+                            Debug.Log(System.BitConverter.ToString(new byte[] { packetType }));
                             break;
                     }
                 }   

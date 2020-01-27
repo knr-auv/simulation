@@ -63,4 +63,9 @@ public class JSON
     {
         public long timestamp, ping;
     }
+
+    public class Init
+    {
+        public int videoPort, jsonPort, quality;
+    }
 }
