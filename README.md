@@ -11,6 +11,7 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
 ## Table of contents
 
 - [Simulation](#simulation)
+	- [Settings file](#settings-file)
 	- [Fluid dynamics](#fluid-dynamics)
 	- [Thrusters](#thrusters)
 - [Networking](#networking)
@@ -22,7 +23,23 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
 ---
 
 ## Simulation
-Simulation was created with Uinty game engine. It simulates behaviour of the Okon AUV.
+Simulation was created with Unity game engine. It simulates behaviour of the Okon AUV.
+
+### Settings file
+During startup, simulation checks for `settings.json` file where it reads port numbers. If not found it uses default values (see [networking](#networking)). *Quality* defines JPG compression level (from `0` to `100` for least image compression)  
+JSON structure:
+- videoPort
+- jsonPort
+- quality
+
+Example  
+```json
+{
+"videoPort": 44208,
+"jsonPort": 44211,
+"quality": 66
+}
+```
 
 ### Fluid dynamics
 Every object that will be dynamic and is in the water has defined *mass*, *volume*, *fluid dynamics constants*, *center of mass* and *center of volume*. Those variables are needed to calculate correct dynamics in the water.
