@@ -1,5 +1,5 @@
 # AUV Simulation
-Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates behaviour of the Okon AUV. Project includes:
+Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates behaviour of the Okon. It's an AUV built by [KNR](http://knr.meil.pw.edu.pl/). Simulation includes:
 - underwater shaders
     - color correction
     - physical camera setup
@@ -12,6 +12,7 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
 
 - [Simulation](#simulation)
 	- [Fluid dynamics](#fluid-dynamics)
+	- [Thrusters](#thrusters)
 - [Networking](#networking)
 	- [Packet structure](#packet-structure)
 	- [Video feed](#video-feed)
@@ -54,7 +55,10 @@ float f(float fill) {
 
 
 ## Networking
-Client interact with simulation via 2 diffrent channels for video and control. 
+Client interact with simulation via 2 diffrent channels for video and control.
+- video default port is `44209`
+- contorl default port is `44210` 
+
 ### Packet structure
 All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.
 
@@ -74,10 +78,10 @@ This channel is responsible for controling simulation: steering the robot, recor
 ##### Control packets table
 Packet type bytes are groped by activity they are connected with:
 - `0x00` to `0x9F` none 
-- `0xA0` to `0xAF` motors
-- `0xB0` to `0xBF` sensors
-- `0xC0` to `0xCF` simulation
-- `0xD0` to `0xDF` data (e.g. recording robot position)
+- `0xA0` to `0xAF` **motors**
+- `0xB0` to `0xBF` **sensors**
+- `0xC0` to `0xCF` **simulation**
+- `0xD0` to `0xDF` **data** (e.g. recording robot position)
 - `0xE0` to `0xEF` none
 - `0xF0` to `0xFF` none
 
