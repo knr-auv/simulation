@@ -8,18 +8,15 @@ using static JSON;
 public class SimulationBehaviour : MonoBehaviour
 {
     [SerializeField]
-    private static int _videoPort = 44209;
-    [SerializeField]
-    private static int _jsonPort = 44210;
-    [SerializeField]
-    private int quality = 85;
-    [SerializeField]
     private bool onbool = false;
     [SerializeField]
     private RenderTexture okonTex;
     [SerializeField]
     private GameObject Okon;
 
+    private int quality = 85;
+    private static int _videoPort = 44209;
+    private static int _jsonPort = 44210;
     private Thread _videoRecv, _jsonRecv;
     private Texture2D _rtTex;
     private byte[] _image = new byte[1], _newImage;
@@ -98,7 +95,7 @@ public class SimulationBehaviour : MonoBehaviour
             NetworkStream nwStream = client.GetStream();
             Debug.Log("Json client connected");
             Packet packet;
-            string jsonFromClient, state = "none";
+            string jsonFromClient, state;
             while (client != null && client.Connected)
             {
                 try
@@ -114,13 +111,26 @@ public class SimulationBehaviour : MonoBehaviour
                         if (dataLength > 0)
                         {
                             byte[] jsonBytes = new byte[dataLength];
-                            nwStream.Read(jsonBytes, 0, dataLength);
+                            int ptr = 0;
+                            do
+                            {
+                                if (dataLength - ptr < client.ReceiveBufferSize)
+                                {
+                                    int bytesRead = nwStream.Read(jsonBytes, ptr, dataLength - ptr);
+                                    ptr += bytesRead;
+                                }
+                                else
+                                {
+                                    int bytesRead = nwStream.Read(jsonBytes, ptr, client.ReceiveBufferSize);
+                                    ptr += bytesRead;
+                                }
+                            } while (ptr != dataLength);
                             jsonFromClient = Encoding.ASCII.GetString(jsonBytes, 0, dataLength);
                         }
                         state = "none";
                         switch (packet)
                         {
-                            case Packet.SET_MTR://motors Json
+                            case Packet.SET_MTR:
                                 Debug.Log("From client: " + jsonFromClient);
                                 TryJsonToObjectState(jsonFromClient, _motors);
                                 okonController.FL.fill = _motors.FL;
@@ -130,14 +140,10 @@ public class SimulationBehaviour : MonoBehaviour
                                 okonController.MR.fill = _motors.MR;
                                 break;
                             case Packet.GET_ORIEN:
-                                string json2send = (JsonUtility.ToJson(okonController.GetOrientation()));
-                                Debug.Log(json2send);
-                                SendJson(Packet.GET_ORIEN, json2send);
+                                SendJson(Packet.GET_ORIEN, JsonUtility.ToJson(okonController.GetOrientation()));
                                 break;
                             case Packet.GET_SENS:
-                                json2send = (JsonUtility.ToJson(okonController.GetSensors()));
-                                Debug.Log(json2send);
-                                SendJson(Packet.GET_SENS, json2send);
+                                SendJson(Packet.GET_SENS, JsonUtility.ToJson(okonController.GetSensors()));
                                 break;
                             case Packet.PING:
                                 JSON.Ping ping = new JSON.Ping();
@@ -153,15 +159,15 @@ public class SimulationBehaviour : MonoBehaviour
                                 break;
                             case (Packet)0xFF:
                                 nwStream?.Close();
-                                nwStream.Dispose();
-                                client.Dispose();
+                                nwStream?.Dispose();
+                                client?.Dispose();
                                 nwStream = null;
                                 client = null;
                                 break;
                             case (Packet)0x00:
                                 nwStream?.Close();
-                                nwStream.Dispose();
-                                client.Dispose();
+                                nwStream?.Dispose();
+                                client?.Dispose();
                                 nwStream = null;
                                 client = null;
                                 break;
@@ -174,13 +180,11 @@ public class SimulationBehaviour : MonoBehaviour
                         #endregion
                     } while (nwStream != null && nwStream.DataAvailable);
                 }
-                catch (System.Exception exp)
+                catch
                 {
-                   // Debug.Log("Json client connection lost " + exp.Message);
                     nwStream?.Close();
                     nwStream?.Dispose();
                     client?.Close();
-                   // break;
                 }
             }
             nwStream?.Dispose();
@@ -193,6 +197,7 @@ public class SimulationBehaviour : MonoBehaviour
                 nwStream.WriteByte((byte)packetType);
                 nwStream.Write(System.BitConverter.GetBytes(bytes.Length), 0, 4);
                 nwStream.Write(bytes, 0, bytes.Length);
+                Debug.Log(json);
             }
 
             void TryJsonToObjectState(string json, object obj)
