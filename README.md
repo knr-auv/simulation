@@ -33,6 +33,8 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
 
 ### Startup
 
+After starting the built project, small black window of Unity application should appear. Simulation is now running and a client can connect. 
+
 ### Settings file
 
 During startup, simulation checks for `settings.json` file where it reads port numbers. If not found it uses default values (see [networking](#networking)). *Quality* defines JPG compression level (from `0` to `100` for least image compression)  
@@ -72,7 +74,7 @@ All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have dat
 
 ### Video stream
 
-Client send request packet and server responds with JPG encoded video frame.
+Client send request packet and server responds with JPG encoded video frame. Size of the image is in range of `15...650KB`.
 
 | Byte | Abbreviation | Description |
 | ---- | ------------ | ----------- |
@@ -186,7 +188,7 @@ JSON structure
 
 #### ACK
 
-ACK packet can help debugging networking. *State* tells if last request was OK and *fps* tells last frames per second during last frame.    
+ACK packet can help debugging networking. They are sent after each request of the client. *State* tells if last request was OK and *fps* tells last frames per second during last frame.    
 JSON structure:
 - fps
 - state
@@ -240,4 +242,4 @@ Camera settings in Unity are based on real values of the camera like sensor size
 
 #### Streaming
 
-
+Camera renders to a Render texture, which is than copied to Texture2D and encoded to a JPG bytes.
