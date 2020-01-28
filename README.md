@@ -77,7 +77,8 @@ Client interact with simulation via 2 diffrent channels for video and control.
 - contorl default port is `44210` 
 
 ### Packet structure
-All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.
+All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.  
+**IMPORTANT Video request packet is only 1 byte long, it is just packet type byte!**
 
 | Packet type | Data length as int32 | Data |
 | ----------- | -------------------- | ---- | 
