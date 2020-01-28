@@ -10,22 +10,31 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
     
 ## Table of contents
 
-- [Simulation](#simulation)
-	- [Settings file](#settings-file)
-	- [Fluid dynamics](#fluid-dynamics)
-	- [Thrusters](#thrusters)
+- [Usage](#usage)
+	- [Startup](#startup)
+	- [Settings](#settings-file)
+	- [Important notes](#important-notes)
 - [Networking](#networking)
-	- [Packet structure](#packet-structure)
-	- [Video feed](#video-feed)
+	- [Packets structure](#packets-structure)
+	- [Video stream](#video-stream)
 	- [Simulation control](#simulation-control)
-- [Important notes](#important-notes)
+- [Simulation](#simulation)
+	- [Physics](#physics)
+		- [Thrusters](#thruster)
+		- [Fluid dynamics](#fluid-dynamics)
+    - [Graphics](#graphics)
+    	- [Shaders](#shaders)
+    	- [Camera](#camera)
+    	- [Streaming](#Streaming)
 
 ---
 
-## Simulation
-Simulation was created with Unity game engine. It simulates behaviour of the Okon AUV.
+## Usage
+
+### Startup
 
 ### Settings file
+
 During startup, simulation checks for `settings.json` file where it reads port numbers. If not found it uses default values (see [networking](#networking)). *Quality* defines JPG compression level (from `0` to `100` for least image compression)  
 JSON structure:
 - videoPort
@@ -41,42 +50,19 @@ Example
 }
 ```
 
-### Fluid dynamics
-Every object that will be dynamic and is in the water has defined *mass*, *volume*, *fluid dynamics constants*, *center of mass* and *center of volume*. Those variables are needed to calculate correct dynamics in the water.
+### Important notes
 
-### Thrusters
-
-Thrusters in simulation have approximated thrust based on [producer charts](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster/). Thrust is approximated with this eqation  
-`ax^3 + bx^2 + cx^2 + d`  
-where parameters are the solution of  
-```
-a*1100^3 + b*1100^2 + c*1100 + d = 4.5
-a*1472^3 + b*1472^2 + c*1472 + d = 0
-a*1528^3 + b*1528^2 + c*1528 + d = 0
-a*1852^3 + b*1852^2 + c*1852 + d = 5.02
-
-a = 1.66352902e-8f
-b = -0.00003994119f
-c = 0.00752234546f
-d = 22.4126993334f
-```
-
-The final function to set the force of the thruster:   
-```cs
-float f(float fill) {
-	float x = Map(fill, -1f, 1f, 1100f, 1900f);
-	if(fill > 0) return Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
-	else return -Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
-}
-```
-
+- JSON must use `"` character, not `'`.
+- Video request packet `0x69` is only 1 byte long
 
 ## Networking
-Client interact with simulation via 2 diffrent channels for video and control.
-- video default port is `44209`
-- contorl default port is `44210` 
 
-### Packet structure
+Client interact with simulation via 2 different channels for video and control.
+- video default port is `44209`
+- control default port is `44210` 
+
+### Packets structure
+
 All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.  
 **IMPORTANT Video request packet is only 1 byte long, it is just packet type byte!**
 
@@ -84,7 +70,8 @@ All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have dat
 | ----------- | -------------------- | ---- | 
 | 1 byte | 4 bytes | n bytes |
 
-### Video feed
+### Video stream
+
 Client send request packet and server responds with JPG encoded video frame.
 
 | Byte | Abbreviation | Description |
@@ -92,8 +79,9 @@ Client send request packet and server responds with JPG encoded video frame.
 | `0x69` | GET_VID | Request video frame |
 
 ### Simulation control
-This channel is responsible for controling simulation: steering the robot, recording data etc. Not all dataframes include data so see [packets structure](#packet-structure). All data is in JSON format. All packets types are listed in the table below.
-##### Control packets table
+
+This channel is responsible for controlling simulation: steering the robot, recording data etc. Not all packets include data so see [packets structure](#packets-structure). All data is in JSON format. All packets types are listed in the table below.
+
 Packet type bytes are groped by activity they are connected with:
 - `0x00` to `0x9F` none 
 - `0xA0` to `0xAF` **motors**
@@ -203,10 +191,53 @@ JSON structure:
 - fps
 - state
 
+## Simulation
 
-## Important notes
+### Physics
 
-- JSON must use `"` character, not `'`.
-- Video request packet `0x69` is only 1 byte long
+Physics in Unity by default is accurate enough for games. For this simulation accuracy was improved by decreasing physics time step to `7` milliseconds.
+
+#### Thrusters
+
+Thrusters in simulation have approximated thrust based on [producer charts](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster/). Thrust is approximated with this equation  
+`ax^3 + bx^2 + cx^2 + d`  
+where parameters are the solution of  
+```
+a*1100^3 + b*1100^2 + c*1100 + d = 4.5
+a*1472^3 + b*1472^2 + c*1472 + d = 0
+a*1528^3 + b*1528^2 + c*1528 + d = 0
+a*1852^3 + b*1852^2 + c*1852 + d = 5.02
+
+a = 1.66352902e-8f
+b = -0.00003994119f
+c = 0.00752234546f
+d = 22.4126993334f
+```
+
+The final function to set the force of the thruster:   
+```cs
+float f(float fill) {
+	float x = Map(fill, -1f, 1f, 1100f, 1900f);
+	if(fill > 0) return Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
+	else return -Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
+}
+```
+
+#### Fluid dynamics
+
+Every object that will be dynamic and is in the water has defined *mass*, *volume*, *fluid dynamics constants*, *center of mass* and *center of volume*. Those variables are needed to calculate correct dynamics in the water.
+
+
+### Graphics
+
+#### Shaders
+
+Shaders are used to give underwater effect to image. This helps testing and training YOLO. It is neural net that allows Okoń to see object in front of it.
+
+#### Camera
+
+Camera settings in Unity are based on real values of the camera like sensor size and field of view.
+
+#### Streaming
 
 
