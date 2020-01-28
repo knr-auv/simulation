@@ -65,7 +65,7 @@ The final function to set the force of the thruster:
 ```cs
 float f(float fill) {
 	float x = Map(fill, -1f, 1f, 1100f, 1900f);
-	if(val > 0) return Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
+	if(fill > 0) return Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
 	else return -Mathf.Max(0f, a*x*x*x + b*x*x + c*x + d);
 }
 ```
@@ -108,8 +108,8 @@ Packet type bytes are groped by activity they are connected with:
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
 | `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
-| `0xC0` | [SET_SIM](#SET_SIM) | Set simulation options | `{quality}` |	 |
-| `0xC1` | [ACK](#ACK) | Acknowledgement |  |  |
+| `0xC0` | [SET_SIM](#set_sim) | Set simulation options | `{quality}` |	 |
+| `0xC1` | [ACK](#ack) | Acknowledgement |  |  |
 | `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | YES
 | `0xC3` | [SET_ORIEN](#set_orien) | Set Okon’s orientation |	`{pos, rot}` |  |
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
@@ -189,11 +189,24 @@ JSON structure:
 
 Example response `{"timestamp":637156806029701490,"ping":11}`
 
+#### SET_SIM
+
+This packet allows to set the compression level of the frame. Value of the *quality* is in range from `0` to `100`.  
+JSON structure
+
+- quality	
+
+#### ACK
+
+ACK packet can help debugging networking. *State* tells if last request was OK and *fps* tells last frames per second during last frame.    
+JSON structure:
+- fps
+- state
+
 
 ## Important notes
 
-- JSON request must include **all** values.
 - JSON must use `"` character, not `'`.
-
+- Video request packet `0x69` is only 1 byte long
 
 
