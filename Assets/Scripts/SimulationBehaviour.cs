@@ -98,13 +98,14 @@ public class SimulationBehaviour : MonoBehaviour
             NetworkStream nwStream = client.GetStream();
             Debug.Log("Json client connected");
             Packet packet;
-            string jsonFromClient;
+            string jsonFromClient, state = "none";
             while (client != null && client.Connected)
             {
-                do
+                try
                 {
-                    try
+                    do
                     {
+                        #region JSON_recv
                         packet = (Packet)nwStream.ReadByte();
                         byte[] dataLenBytes = new byte[4];
                         nwStream.Read(dataLenBytes, 0, 4);
@@ -116,12 +117,12 @@ public class SimulationBehaviour : MonoBehaviour
                             nwStream.Read(jsonBytes, 0, dataLength);
                             jsonFromClient = Encoding.ASCII.GetString(jsonBytes, 0, dataLength);
                         }
-                        
+                        state = "none";
                         switch (packet)
                         {
                             case Packet.SET_MTR://motors Json
                                 Debug.Log("From client: " + jsonFromClient);
-                                TryJsonToObject(jsonFromClient, _motors);
+                                TryJsonToObjectState(jsonFromClient, _motors);
                                 okonController.FL.fill = _motors.FL;
                                 okonController.FR.fill = _motors.FR;
                                 okonController.B.fill = _motors.B;
@@ -140,12 +141,25 @@ public class SimulationBehaviour : MonoBehaviour
                                 break;
                             case Packet.PING:
                                 JSON.Ping ping = new JSON.Ping();
-                                TryJsonToObject(jsonFromClient, ping);
+                                TryJsonToObjectState(jsonFromClient, ping);
                                 ping.ping = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond - ping.timestamp;
                                 ping.timestamp = System.DateTime.Now.Ticks;
                                 SendJson(Packet.PING, JsonUtility.ToJson(ping));
                                 break;
+                            case Packet.SET_SIM:
+                                Settings settings = new Settings();
+                                TryJsonToObjectState(jsonFromClient, settings);
+                                quality = settings.quality;
+                                break;
                             case (Packet)0xFF:
+                                nwStream?.Close();
+                                nwStream.Dispose();
+                                client.Dispose();
+                                nwStream = null;
+                                client = null;
+                                break;
+                            case (Packet)0x00:
+                                nwStream?.Close();
                                 nwStream.Dispose();
                                 client.Dispose();
                                 nwStream = null;
@@ -153,23 +167,25 @@ public class SimulationBehaviour : MonoBehaviour
                                 break;
                             default:
                                 Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packet }));
+                                state = "Unsupported packet " + System.BitConverter.ToString(new byte[] { (byte)packet });
                                 break;
                         }
-                        SendJson(Packet.ACK, "{\"fps\":" +Mathf.Round(_fps).ToString() + "}");
-                    }
-                    catch(System.Exception exp)
-                    {
-                        Debug.Log("Json client crashed " + exp.Message);
-                        nwStream?.Close();
-                        nwStream?.Dispose();
-                        client?.Close();
-                        break;
-                    }
-                } while (nwStream != null && nwStream.DataAvailable);
+                        SendJson(Packet.ACK, "{\"fps\":" + Mathf.Round(_fps).ToString() + ", \"state\":\"" + state + "\"}");
+                        #endregion
+                    } while (nwStream != null && nwStream.DataAvailable);
+                }
+                catch (System.Exception exp)
+                {
+                   // Debug.Log("Json client connection lost " + exp.Message);
+                    nwStream?.Close();
+                    nwStream?.Dispose();
+                    client?.Close();
+                   // break;
+                }
             }
             nwStream?.Dispose();
             client?.Dispose();
-            Debug.Log("Json client disconnected");
+            Debug.Log("Json client connection lost");
 
             void SendJson(Packet packetType, string json)
             {
@@ -178,9 +194,22 @@ public class SimulationBehaviour : MonoBehaviour
                 nwStream.Write(System.BitConverter.GetBytes(bytes.Length), 0, 4);
                 nwStream.Write(bytes, 0, bytes.Length);
             }
+
+            void TryJsonToObjectState(string json, object obj)
+            {
+                try
+                {
+                    JsonUtility.FromJsonOverwrite(json, obj);
+                }
+                catch(System.Exception exp)
+                {
+                    Debug.Log("Wrong JSON for " + obj.GetType().ToString());
+                    state = exp.Message;
+                }
+            }
         }
     }
-
+    
     private void TryJsonToObject(string json, object obj)
     {
         try
