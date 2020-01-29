@@ -56,6 +56,7 @@ Example
 
 - JSON must use `"` character, not `'`.
 - Video request packet `0x69` is only 1 byte long
+- Data length is in little endian
 
 ## Networking
 
@@ -65,7 +66,7 @@ Client interact with simulation via 2 different channels for video and control.
 
 ### Packets structure
 
-All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data.  
+All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data. Data length is in little endian.  
 **IMPORTANT Video request packet is only 1 byte long, it is just packet type byte!**
 
 | Packet type | Data length as int32 | Data |
@@ -99,7 +100,7 @@ Packet type bytes are groped by activity they are connected with:
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
 | `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
 | `0xC0` | [SET_SIM](#set_sim) | Set simulation options | `{quality}` |	 |
-| `0xC1` | [ACK](#ack) | Acknowledgement |  |  |
+| `0xC1` | [ACK](#ack) | acknowledgement |  |  |
 | `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | YES
 | `0xC3` | [SET_ORIEN](#set_orien) | Set Okon’s orientation |	`{pos, rot}` |  |
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
@@ -181,7 +182,7 @@ Example response `{"timestamp":637156806029701490,"ping":11}`
 
 #### SET_SIM
 
-This packet allows to set the compression level of the frame. Value of the *quality* is in range from `0` to `100`.  
+This packet allows to set the compression level of the frame. Value of the *quality* is in range from `0` to `100` (see [settings file](#settings-file)).  
 JSON structure
 
 - quality	
@@ -194,6 +195,8 @@ JSON structure:
 - state
 
 ## Simulation
+
+Simulation uses Unity physics engine with a script that implements fluid dynamics. Also 3d model of the robot is added for correct collisions with objects.
 
 ### Physics
 
@@ -234,7 +237,7 @@ Every object that will be dynamic and is in the water has defined *mass*, *volum
 
 #### Shaders
 
-Shaders are used to give underwater effect to image. This helps testing and training YOLO. It is neural net that allows Okoń to see object in front of it.
+Shaders are used to give underwater effect to image. This helps testing and training YOLO. It is neural net that allows Okoń to see object in front of it. The most important ones are color correction that reduces reds in the image and fog which is responsible for limiting distance of seeing.
 
 #### Camera
 
