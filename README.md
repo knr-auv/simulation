@@ -98,16 +98,16 @@ Packet type bytes are groped by activity they are connected with:
 | ---- | ------------ | ------------| ---------------- | ---------------- | ------- | 
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
-| `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | YES
+| `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | Yes
 | `0xC0` | [SET_SIM](#set_sim) | Set simulation options | `{quality}` |	 |
-| `0xC1` | [ACK](#ack) | acknowledgement |  |  |
-| `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | YES
-| `0xC3` | [SET_ORIEN](#set_orien) | Set Okon’s orientation |	`{pos, rot}` |  |
+| `0xC1` | [ACK](#ack) | Acknowledgement |  |  | Yes
+| `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | Yes
+| `0xC3` | [SET_ORIEN](#set_orien) | Set Okon’s orientation |	`{pos, rot}` |  | Yes
 | `0xD0` | [REC_STRT](#REC_STRT) | Start recording pos. and dir. | | *Verification?*
 | `0xD1` | [REC_ST](#REC_ST) | Stop recording | | |
 | `0xD2` | [REC_RST](#_RST) | Reset and clear recording | | |
 | `0xD3` | [GET_REC](#GET_REC) | Get recorded data | | *Array of pos and dir*
-| `0xC5` | [PING](#ping) | Send ping to server |	`{timestamp, ping}` | `{timestamp, ping}` | YES
+| `0xC5` | [PING](#ping) | Send ping to server |	`{timestamp, ping}` | `{timestamp, ping}` | Yes
 | `0xC4` | [KILL](#KILL) | Kill the simulation |	| |
 
 ---
