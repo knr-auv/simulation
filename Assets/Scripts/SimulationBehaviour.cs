@@ -8,13 +8,13 @@ using static JSON;
 public class SimulationBehaviour : MonoBehaviour
 {
     [SerializeField]
-    private bool onbool = false;
+    private bool _renderEnabled = false;
     [SerializeField]
-    private RenderTexture okonTex;
+    private RenderTexture _okonTex;
     [SerializeField]
-    private GameObject Okon;
-
-    private int quality = 85;
+    private GameObject _okon;
+    [SerializeField]
+    public int quality = 85;
     private static int _videoPort = 44209;
     private static int _jsonPort = 44210;
     private Thread _videoRecv, _jsonRecv;
@@ -23,7 +23,7 @@ public class SimulationBehaviour : MonoBehaviour
     private Texture2D _tex;
     private bool _swxh = true;
     private Motors _motors = new Motors();
-    private OkonController okonController;
+    private OkonController _okonController;
     private float _fps = 0;
 
     private enum Packet : byte{
@@ -32,11 +32,11 @@ public class SimulationBehaviour : MonoBehaviour
         SET_SIM = 0xC0,
         ACK = 0xC1,
         GET_ORIEN = 0xC2,
-        SET_POS = 0xC3,
+        SET_ORIEN = 0xC3,
         REC_STRT = 0xD0,
         REC_ST = 0xD1,
         REC_RST = 0xD2,
-        GE_REC = 0xD3,
+        GET_REC = 0xD3,
         PING = 0xC5
     }
 
@@ -56,8 +56,8 @@ public class SimulationBehaviour : MonoBehaviour
             _videoPort = 44209;
             _jsonPort = 44210;
         }
-        _tex = new Texture2D(okonTex.width, okonTex.height, TextureFormat.RGB24, false);
-        okonController = Okon.GetComponent<OkonController>();
+        _tex = new Texture2D(_okonTex.width, _okonTex.height, TextureFormat.RGB24, false);
+        _okonController = _okon.GetComponent<OkonController>();
         _videoRecv = new Thread(VideoRecv);
         _jsonRecv = new Thread(JsonRecv);
         _videoRecv.IsBackground = true;
@@ -68,11 +68,11 @@ public class SimulationBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if (!onbool) return;
+        if (!_renderEnabled) return;
         if (_swxh)
         {
-            RenderTexture.active = okonTex;
-            _tex.ReadPixels(new Rect(0, 0, okonTex.width, okonTex.height), 0, 0);
+            RenderTexture.active = _okonTex;
+            _tex.ReadPixels(new Rect(0, 0, _okonTex.width, _okonTex.height), 0, 0);
             _swxh = false;
         }
         else
@@ -92,7 +92,7 @@ public class SimulationBehaviour : MonoBehaviour
         while (true)
         {
             TcpClient client = listener.AcceptTcpClient();
-            NetworkStream nwStream = client.GetStream();
+            NetworkStream stream = client.GetStream();
             Debug.Log("Json client connected");
             Packet packet;
             string jsonFromClient, state;
@@ -103,9 +103,9 @@ public class SimulationBehaviour : MonoBehaviour
                     do
                     {
                         #region JSON_recv
-                        packet = (Packet)nwStream.ReadByte();
+                        packet = (Packet)stream.ReadByte();
                         byte[] dataLenBytes = new byte[4];
-                        nwStream.Read(dataLenBytes, 0, 4);
+                        stream.Read(dataLenBytes, 0, 4);
                         int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
                         jsonFromClient = "{}";
                         if (dataLength > 0)
@@ -116,12 +116,12 @@ public class SimulationBehaviour : MonoBehaviour
                             {
                                 if (dataLength - ptr < client.ReceiveBufferSize)
                                 {
-                                    int bytesRead = nwStream.Read(jsonBytes, ptr, dataLength - ptr);
+                                    int bytesRead = stream.Read(jsonBytes, ptr, dataLength - ptr);
                                     ptr += bytesRead;
                                 }
                                 else
                                 {
-                                    int bytesRead = nwStream.Read(jsonBytes, ptr, client.ReceiveBufferSize);
+                                    int bytesRead = stream.Read(jsonBytes, ptr, client.ReceiveBufferSize);
                                     ptr += bytesRead;
                                 }
                             } while (ptr != dataLength);
@@ -133,17 +133,22 @@ public class SimulationBehaviour : MonoBehaviour
                             case Packet.SET_MTR:
                                 Debug.Log("From client: " + jsonFromClient);
                                 TryJsonToObjectState(jsonFromClient, _motors);
-                                okonController.FL.fill = _motors.FL;
-                                okonController.FR.fill = _motors.FR;
-                                okonController.B.fill = _motors.B;
-                                okonController.ML.fill = _motors.ML;
-                                okonController.MR.fill = _motors.MR;
+                                _okonController.FL.fill = _motors.FL;
+                                _okonController.FR.fill = _motors.FR;
+                                _okonController.B.fill = _motors.B;
+                                _okonController.ML.fill = _motors.ML;
+                                _okonController.MR.fill = _motors.MR;
                                 break;
                             case Packet.GET_ORIEN:
-                                SendJson(Packet.GET_ORIEN, JsonUtility.ToJson(okonController.GetOrientation()));
+                                SendJson(Packet.GET_ORIEN, JsonUtility.ToJson(_okonController.GetOrientation()));
+                                break;
+                            case Packet.SET_ORIEN:
+                                Orientation orientation = new Orientation();
+                                TryJsonToObject(jsonFromClient, orientation);
+                                _okonController.SetOrientation(orientation);
                                 break;
                             case Packet.GET_SENS:
-                                SendJson(Packet.GET_SENS, JsonUtility.ToJson(okonController.GetSensors()));
+                                SendJson(Packet.GET_SENS, JsonUtility.ToJson(_okonController.GetSensors()));
                                 break;
                             case Packet.PING:
                                 JSON.Ping ping = new JSON.Ping();
@@ -157,18 +162,21 @@ public class SimulationBehaviour : MonoBehaviour
                                 TryJsonToObjectState(jsonFromClient, settings);
                                 quality = settings.quality;
                                 break;
+                            case Packet.ACK:
+                                SendJson(Packet.ACK, "{\"fps\":" + Mathf.Round(_fps).ToString() + ", \"state\":\"" + state + "\"}");
+                                break;
                             case (Packet)0xFF:
-                                nwStream?.Close();
-                                nwStream?.Dispose();
+                                stream?.Close();
+                                stream?.Dispose();
                                 client?.Dispose();
-                                nwStream = null;
+                                stream = null;
                                 client = null;
                                 break;
                             case (Packet)0x00:
-                                nwStream?.Close();
-                                nwStream?.Dispose();
+                                stream?.Close();
+                                stream?.Dispose();
                                 client?.Dispose();
-                                nwStream = null;
+                                stream = null;
                                 client = null;
                                 break;
                             default:
@@ -176,27 +184,27 @@ public class SimulationBehaviour : MonoBehaviour
                                 state = "Unsupported packet " + System.BitConverter.ToString(new byte[] { (byte)packet });
                                 break;
                         }
-                        SendJson(Packet.ACK, "{\"fps\":" + Mathf.Round(_fps).ToString() + ", \"state\":\"" + state + "\"}");
+                        if(state != "none") SendJson(Packet.ACK, "{\"fps\":" + Mathf.Round(_fps).ToString() + ", \"state\":\"" + state + "\"}");
                         #endregion
-                    } while (nwStream != null && nwStream.DataAvailable);
+                    } while (stream != null && stream.DataAvailable);
                 }
                 catch
                 {
-                    nwStream?.Close();
-                    nwStream?.Dispose();
+                    stream?.Close();
+                    stream?.Dispose();
                     client?.Close();
                 }
             }
-            nwStream?.Dispose();
+            stream?.Dispose();
             client?.Dispose();
             Debug.Log("Json client connection lost");
 
             void SendJson(Packet packetType, string json)
             {
                 byte[] bytes = Encoding.ASCII.GetBytes(json);
-                nwStream.WriteByte((byte)packetType);
-                nwStream.Write(System.BitConverter.GetBytes(bytes.Length), 0, 4);
-                nwStream.Write(bytes, 0, bytes.Length);
+                stream.WriteByte((byte)packetType);
+                stream.Write(System.BitConverter.GetBytes(bytes.Length), 0, 4);
+                stream.Write(bytes, 0, bytes.Length);
                 Debug.Log(json);
             }
 
@@ -236,7 +244,7 @@ public class SimulationBehaviour : MonoBehaviour
         while (true)
         {
             TcpClient client = listener.AcceptTcpClient();
-            NetworkStream nwStream = client.GetStream();
+            NetworkStream stream = client.GetStream();
             byte packetType;
             bool clientConnected = true;
             Debug.Log("Video client connected");
@@ -246,7 +254,7 @@ public class SimulationBehaviour : MonoBehaviour
                 {
                     try
                     {
-                        packetType = (byte)nwStream.ReadByte();
+                        packetType = (byte)stream.ReadByte();
                     }
                     catch
                     {
@@ -259,9 +267,9 @@ public class SimulationBehaviour : MonoBehaviour
                     {
                         case 0x69:
                             _image = _newImage;
-                            nwStream.WriteByte(0x69);
-                            nwStream.Write(System.BitConverter.GetBytes(_image.Length), 0, 4);
-                            nwStream.Write(_image, 0, _image.Length);
+                            stream.WriteByte(0x69);
+                            stream.Write(System.BitConverter.GetBytes(_image.Length), 0, 4);
+                            stream.Write(_image, 0, _image.Length);
                             break;
                         case 0x00:
                             clientConnected = false;
@@ -289,7 +297,8 @@ public class SimulationBehaviour : MonoBehaviour
     {
         _videoRecv?.Abort();
         _jsonRecv?.Abort();
-        Debug.Log("Simulation halted");
+        Thread.Sleep(5);
+        Debug.Log("Simulation halted: " + _jsonRecv.ThreadState + " _ " + _videoRecv.ThreadState);
     }
 
     /*public void CreateNTestCubes(int n)

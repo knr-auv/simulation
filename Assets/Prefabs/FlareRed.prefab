@@ -115,6 +115,7 @@ MonoBehaviour:
   gravityConstant: 0
   massCenterOffset: {x: 0, y: 0, z: 0}
   volumeCenterOffset: {x: 0, y: 0, z: 0}
+  drawGizmos: 1
 --- !u!54 &6751522935692514860
 Rigidbody:
   m_ObjectHideFlags: 0

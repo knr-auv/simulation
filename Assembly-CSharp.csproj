@@ -62,9 +62,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\CameraController.cs" />
+    <Compile Include="Assets\BoxController.cs" />
+    <Compile Include="Assets\Scripts\AutoSim.cs" />
     <Compile Include="Assets\Scripts\CameraScript.cs" />
     <Compile Include="Assets\Scripts\CCTVController.cs" />
+    <Compile Include="Assets\Scripts\DataSetCameraController.cs" />
     <Compile Include="Assets\Scripts\FogEnabled.cs" />
     <Compile Include="Assets\Scripts\JSON.cs" />
     <Compile Include="Assets\Scripts\MotorController.cs" />
