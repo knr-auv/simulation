@@ -99,6 +99,7 @@ Packet type bytes are groped by activity they are connected with:
 | `0xA0` | [SET_MTR](#set_mtr) | Set motor power | ```{FL, FR, ML, MR, B}``` |  | Yes
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
 | `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | Yes
+| `0xB1` | [GET_DEPTH](#GET_DEPTH) | Requests depth texture |	 | `{depth}` | Yes
 | `0xC0` | [SET_SIM](#set_sim) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ack) | Acknowledgement |  |  | Yes
 | `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | Yes
@@ -129,28 +130,44 @@ Example request`{"FL":0.1,"FR":-1.0,"ML":0.1,"MR":0.0,"B":0.008}`
 Packet requests current values of on-board sensors (*gyroscope*, *accelerometer* and *barometer*). Values `x, y, z` for *gyroscope* are in degrees.  
 JSON structure:
 - gyro
-	- x
+    - x
+    - y
+    - z
+- rot_speed
+    - x
     - y
     - z
 - accel
-  	- x
+    - x
+    - y
+    - z
+- angular_accel
+    - x
     - y
     - z
 - baro 
   - pressure  
 
-Example response `{"gyro":{"x":0.0,"y":0.0,"z":0.0},"accel":{"x":-1.8893474690019438e-19,"y":0.001282564247958362,"z":1.6839033465654367e-21},"baro":{"pressure":6462.2197265625}}`
+Example response `{"gyro":{"x":-9.81e-16,"y":180.0,"z":5.269e-7},"rot_speed":{"x":1.2e-9,"y":1.41e-11,"z":2.282e-11},"accel":{"x":4.0e-16,"y":0.084,"z":-5.37e-17},"angular_accel":{"x":6.2e-11,"y":7.024e-13,"z":1.13e-12},"baro":{"pressure":11115.315}}`
+
+#### GET_DEPTH
+
+Packet requests depth map.
+JSON structure:
+- depth
+
+Example response `{"depth":"BASE64_DEPTH_IMAGE_STRING"}`
 
 #### GET_ORIEN
 
 Packet requests current orientation of the robot (*rotation* and *position*). *Position* values are in simulation's world coordinates.
 JSON structure:
 - rot
-  	- x
+    - x
     - y
     - z
 - pos
-  	- x
+    - x
     - y
     - z
 
@@ -161,11 +178,11 @@ Example response `{"rot":{"x":0.0,"y":0.0,"z":0.0},"pos":{"x":-1.240000009536743
 Packet allows to set *position* and *rotation* of the robot in simulation's world space. *Rotation* values are in degrees.  
 JSON structure:  
 - rot
-  	- x
+    - x
     - y
     - z
 - pos
-  	- x
+    - x
     - y
     - z
 
