@@ -72,3 +72,6 @@ crashlytics-build.properties
 
 # Local Work Files
 /LocalWork/
+
+# Build
+!/Build/*

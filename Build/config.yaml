@@ -6,12 +6,12 @@ simulationOptions:
   videoQuality: 60
   selectedWaterContainer: waterpool1
   selectedRobot: okon2
-  selectedRandomObjects: [gate4, gate2]
+  selectedRandomObjects: [gate2, gate2]
   fixedDeltaTime: 0.01
   depthMapQuality: 90
   depthMapScale: 0.25
   videoFeedQuality: 90
-  videoFeedScale: 1
+  videoFeedScale: .75
   
 datasetOptions:
   classNames: [gate, obstacle]
