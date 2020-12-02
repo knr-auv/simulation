@@ -1,4 +1,4 @@
-# AUV Simulation
+# AUV Simulation 2.0
 Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simulates behaviour of the Okon. It's an AUV built by [KNR](http://knr.meil.pw.edu.pl/). Simulation includes:
 - underwater shaders
     - color correction
@@ -7,8 +7,6 @@ Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simula
 - simple fluid dynamics
     - laminar and dynamic flow
     - buoyancy
-    
-	**WARNING! Docs are outdated!**
 	
 ## Table of contents
 
@@ -35,30 +33,18 @@ Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simula
 
 ### Startup
 
-After starting the built project, small black window of Unity application should appear. Simulation is now running and a client can connect. 
+After starting the built project, small black window of Unity application should appear. It will show info regarding configuration file `config.yaml`. Follow instructions on the screen. Simulation is now running and clients can connect.  Make sure that in `config.yaml` mode is equal to `simulation`
 
 ### Settings file
 
-During startup, simulation checks for `settings.json` file where it reads port numbers. If not found it uses default values (see [networking](#networking)). *Quality* defines JPG compression level (from `0` to `100` for least image compression)  
-JSON structure:
-- videoPort
-- jsonPort
-- quality
-
-Example  
-```json
-{
-"videoPort": 44208,
-"jsonPort": 44211,
-"quality": 66
-}
-```
+During startup, simulation checks for `config.yaml` file. If not found it uses default values and creates file `config.yaml`
 
 ### Important notes
 
 - JSON must use `"` character, not `'`.
 - Video request packet `0x69` is only 1 byte long
 - Data length is in little endian
+- Not all packets data is JSON (string), some have binary data
 
 ## Networking
 
@@ -71,9 +57,9 @@ Client interact with simulation via 2 different channels for video and control.
 All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have data. Data length is in little endian.  
 **IMPORTANT Video request packet is only 1 byte long, it is just packet type byte!**
 
-| Packet type | Data length as int32 | Data |
+| Packet type | Packet flag | Data length as int32 | Data |
 | ----------- | -------------------- | ---- | 
-| 1 byte | 4 bytes | n bytes |
+| 1 byte | 1 byte | 4 bytes | n bytes |
 
 ### Video stream
 
@@ -102,6 +88,8 @@ Packet type bytes are groped by activity they are connected with:
 | `0xA1` | [ARM_MTR](#ARM_MTR) | Arm motors |  |  | 
 | `0xB0` | [GET_SENS](#get_sens)	| Get sensors read outs	|  | `{accel, gyro, baro}` | Yes
 | `0xB1` | [GET_DEPTH](#GET_DEPTH) | Requests depth texture |	 | `{depth}` | Yes
+| `0xB2` | [GET_DEPTH_BYTES](#GET_DEPTH_BYTES) | Requests depth texture |	 | `binary data` | Yes
+| `0xB3` | [GET_VIDEO_BYTES](#GET_VIDEO_BYTES) | Requests video frame |	 | `binary data` | Yes
 | `0xC0` | [SET_SIM](#set_sim) | Set simulation options | `{quality}` |	 |
 | `0xC1` | [ACK](#ack) | Acknowledgement |  |  | Yes
 | `0xC2` | [GET_ORIEN](#get_orien) | Get Okon’s orientation |  | `{pos, rot}` | Yes
@@ -159,6 +147,16 @@ JSON structure:
 - depth
 
 Example response `{"depth":"BASE64_DEPTH_IMAGE_STRING"}`
+
+#### GET_DEPTH_BYTES
+
+Packet requests depth map.  
+binary data containing JPG/PNG encoded image
+
+#### GET_VIDEO_BYTES
+
+Packet requests video frame.  
+binary data containing JPG/PNG encoded image
 
 #### GET_ORIEN
 
