@@ -58,8 +58,8 @@ All packets are `TCP/IP`. Data length is equal to 0 when packet doesn't have dat
 **IMPORTANT Video request packet is only 1 byte long, it is just packet type byte!**
 
 | Packet type | Packet flag | Data length as int32 | Data |
-| ----------- | -------------------- | ---- | 
-| 1 byte | 1 byte | 4 bytes | n bytes |
+| ----------- | ----------- | -------------------- | ---- | 
+| 1 byte      | 1 byte      | 4 bytes              | n bytes |
 
 ### Video stream
 
