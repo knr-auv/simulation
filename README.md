@@ -1,5 +1,5 @@
 # AUV Simulation
-Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates behaviour of the Okon. It's an AUV built by [KNR](http://knr.meil.pw.edu.pl/). Simulation includes:
+Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simulates behaviour of the Okon. It's an AUV built by [KNR](http://knr.meil.pw.edu.pl/). Simulation includes:
 - underwater shaders
     - color correction
     - physical camera setup
@@ -8,6 +8,8 @@ Okoń AUV simulation built in [Unity](https://unity.com/) 2019.2.0f1. Simulates 
     - laminar and dynamic flow
     - buoyancy
     
+	**WARNING! Docs are outdated!**
+	
 ## Table of contents
 
 - [Usage](#usage)
