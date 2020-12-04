@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{65F7C7F9-258B-B6EA-081D-443B9A0F7A49}</ProjectGuid>
+    <ProjectGuid>{5BEE10C4-149B-25A3-D7FE-2D73FC7CC1DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -59,6 +59,7 @@
     <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
     <Compile Include="Assets\Code\Scripts\Utility\MainController.cs" />
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetGeneratorController.cs" />
+    <Compile Include="Assets\Code\Scripts\Simulation\Robot\Okon2Modules.cs" />
     <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\PauseMenu.cs" />
     <Compile Include="Assets\Graphics\RenderDepth.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\WAPIClient.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetObjectInfo.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\JSON.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\Robot\RobotController.cs" />
-    <Compile Include="Assets\Code\Scripts\Simulation\Robot\Okon2Modules.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\Packages\System.Threading.Tasks.Extensions.4.4.0\LICENSE.TXT" />
@@ -690,7 +690,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{00D13984-8ED2-3418-CCB6-474180B7A925}</Project>
+      <Project>{A030861A-4DA3-5C25-6564-AEBDF61363D3}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
   </ItemGroup>

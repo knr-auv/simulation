@@ -9,9 +9,9 @@ simulationOptions:
   selectedRandomObjects: [gate4, gate2]
   fixedDeltaTime: 0.01
   depthMapQuality: 90
-  depthMapScale: 0.25
+  depthMapScale: 0.1
   videoFeedQuality: 90
-  videoFeedScale: 1
+  videoFeedScale: 0.5
   
 datasetOptions:
   classNames: [gate, obstacle]

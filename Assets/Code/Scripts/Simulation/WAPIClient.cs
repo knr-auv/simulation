@@ -96,14 +96,14 @@ public class WAPIClient
                         case Packet.GET_SENS:
                             SendJson(Packet.GET_SENS, JsonSerializer.ToJsonString(rc.allSensors.Get()));
                             break;
-                        /*case Packet.PING:
-                            JSON.Ping ping = new JSON.Ping();
-                            TryJsonToObjectState(jsonFromClient, ping);
-                            ping.ping = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond - ping.timestamp;
-                            ping.timestamp = System.DateTime.Now.Ticks;
-                            SendJson(Packet.PING, JsonUtility.ToJson(ping));
+                        case Packet.PING:
+                            JSON.Ping ping = JsonSerializer.Deserialize<JSON.Ping>(jsonFromClient);
+                            long clientTimestamp = ping.timestamp;
+                            ping.timestamp = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
+                            ping.ping = ping.timestamp - clientTimestamp;
+                            SendJson(Packet.PING, JsonSerializer.ToJsonString(ping));
                             break;
-                        case Packet.SET_SIM:
+                        /*case Packet.SET_SIM:
                             Settings settings = new Settings();
                             TryJsonToObjectState(jsonFromClient, settings);
                             quality = settings.quality;
