@@ -177,6 +177,8 @@ MonoBehaviour:
   - {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
   - {fileID: 5010327682678381875, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
   - {fileID: 3346525046335329387, guid: 51a85fe07c6400945aa11b56961668c6, type: 3}
+  - {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+  - {fileID: 4198484461444452055, guid: 217191da3ae6e1b4ebdab26258188c2a, type: 3}
   robotController: {fileID: 0}
   depthMapBytes: 
   getDepthImage: 0

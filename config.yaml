@@ -6,7 +6,7 @@ simulationOptions:
   videoQuality: 60
   selectedWaterContainer: waterpool1
   selectedRobot: okon2
-  selectedRandomObjects: [gate4, gate2]
+  selectedRandomObjects: [gate4, gate2, tripod1, tripod1, obstacle1]
   fixedDeltaTime: 0.01
   depthMapQuality: 90
   depthMapScale: 0.1
@@ -15,9 +15,9 @@ simulationOptions:
   
 datasetOptions:
   classNames: [gate, obstacle]
-  selectedObjects: [gate4, obstacle1, gate2]
+  selectedObjects: [gate4, obstacle1, gate2, tripod1]
   selectedWaterContainer: waterpool1
-  objectVisibleFrameNum: 50
+  objectVisibleFrameNum: 10
   objectMultipleFrameNum: 50
   objectBlankFrameNum: 3
   minCameraDistanceToObject: 0

@@ -71,6 +71,10 @@ public class SimulationController : MonoBehaviour
                 randomObject.transform.rotation = Quaternion.Euler(UnityEngine.Random.Range(0f, 360f), UnityEngine.Random.Range(0f, 360f), UnityEngine.Random.Range(0f, 0f));
                 randomObject.transform.position = DatasetObjectInfo.GetRandomWorldPosistionInBoundary(randomObject, waterContainer);
             }
+            else
+            {
+                Debug.LogError(randomObjectName);
+            }
         }
 
         Time.fixedDeltaTime = Settings.config.simulationOptions.fixedDeltaTime;

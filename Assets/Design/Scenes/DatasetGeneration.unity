@@ -253,6 +253,7 @@ MonoBehaviour:
   gate4: {fileID: 5010327682678381875, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
   waterpool1: {fileID: 8741456509798514573, guid: d5c8da9c1138ae04c851d11134c2f6e8, type: 3}
   obstacle1: {fileID: 4198484461444452055, guid: 217191da3ae6e1b4ebdab26258188c2a, type: 3}
+  tripod1: {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
   light1: {fileID: 469088121}
   light2: {fileID: 1432505477}
 --- !u!4 &876384897

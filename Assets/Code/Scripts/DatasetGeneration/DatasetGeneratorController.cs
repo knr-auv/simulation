@@ -21,6 +21,7 @@ public class DatasetGeneratorController : MonoBehaviour
     [SerializeField] GameObject gate4;
     [SerializeField] GameObject waterpool1;
     [SerializeField] GameObject obstacle1;
+    [SerializeField] GameObject tripod1;
 
     [Header("Lights")]
     [SerializeField] Light light1;
@@ -72,6 +73,7 @@ public class DatasetGeneratorController : MonoBehaviour
         knownObjects.Add(gate4);
         knownObjects.Add(waterpool1);
         knownObjects.Add(obstacle1);
+        knownObjects.Add(tripod1);
 
         var waterContainerName = Settings.config.datasetOptions.selectedWaterContainer;
 
