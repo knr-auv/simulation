@@ -7,7 +7,7 @@ simulationOptions:
   selectedWaterContainer: waterpool1
   selectedRobot: okon2
   selectedRandomObjects: [gate4, gate2, tripod1, tripod1, obstacle1]
-  fixedDeltaTime: 0.01
+  fixedDeltaTime: 0.001
   depthMapQuality: 90
   depthMapScale: 0.1
   videoFeedQuality: 90

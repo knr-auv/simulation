@@ -75,7 +75,7 @@ public class WAPIClient
                     byte[] dataFromClient = new byte[dataLength];
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
-
+                    
                     switch (packetType)
                     {
                         case Packet.SET_MTR:
@@ -167,7 +167,7 @@ public class WAPIClient
             }
             catch(Exception exp)    
             {
-                Debug.LogError("Json client exception\n" + exp.Message + '\n' + exp.StackTrace);
+                Debug.LogError("Json client exception\n" + jsonFromClient + "\n"  + exp.Message + '\n' + exp.StackTrace);
                 clientConnected = false;
             }
         }
