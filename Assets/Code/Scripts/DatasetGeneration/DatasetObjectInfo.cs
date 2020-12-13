@@ -87,7 +87,7 @@ public class DatasetObjectInfo : MonoBehaviour
             Mesh mesh = meshFilter.sharedMesh;
             GameObject currentObject = meshFilter.gameObject;
             int len = mesh.triangles.Length;
-            if(len > 10000)//Optimize big meshes
+            if(len > 5000)//Optimize big meshes
             {
                 for (int j = 0; j < n / meshFilters.Length; j++)
                 {

@@ -1,4 +1,4 @@
-mode: simulation
+mode: dataset
 loggingEnabled: false
 simulationOptions:
   videoPort: 44209
@@ -6,7 +6,7 @@ simulationOptions:
   videoQuality: 60
   selectedWaterContainer: waterpool1
   selectedRobot: okon2
-  selectedRandomObjects: [gate4, gate2, tripod1, tripod1, obstacle1]
+  selectedRandomObjects: [gate2, tripod1, diver1]
   fixedDeltaTime: 0.001
   depthMapQuality: 90
   depthMapScale: 0.1
@@ -15,7 +15,7 @@ simulationOptions:
   
 datasetOptions:
   classNames: [gate, obstacle]
-  selectedObjects: [gate4, obstacle1, gate2, tripod1]
+  selectedObjects: [gate4, diver1]
   selectedWaterContainer: waterpool1
   objectVisibleFrameNum: 10
   objectMultipleFrameNum: 50
