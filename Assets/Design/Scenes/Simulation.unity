@@ -172,7 +172,7 @@ MonoBehaviour:
   knownObjects:
   - {fileID: 8741456509798514573, guid: d5c8da9c1138ae04c851d11134c2f6e8, type: 3}
   - {fileID: 5454608055841301633, guid: 42f1d6441f8db0446800880e424eaddb, type: 3}
-  - {fileID: 1935897540130140153, guid: e5a8be7f2516d5340a6b8c1595a7cb49, type: 3}
+  - {fileID: 4824631551124673532, guid: e521fa4b5b23684408c3e2c0d82c0d86, type: 3}
   - {fileID: 3863050216143738952, guid: 1ef74fb2d6f28b741ba6b218211c9c4b, type: 3}
   - {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
   - {fileID: 5010327682678381875, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
@@ -180,6 +180,7 @@ MonoBehaviour:
   - {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
   - {fileID: 4198484461444452055, guid: 217191da3ae6e1b4ebdab26258188c2a, type: 3}
   - {fileID: 6276034910737316492, guid: a31c4645bad1c5f40ac063a8169c07a0, type: 3}
+  - {fileID: 1881995280087384245, guid: a9bc8f174978ecc4b9b866fa369cbc9d, type: 3}
   robotController: {fileID: 0}
   depthMapBytes: 
   getDepthImage: 0
