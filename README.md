@@ -37,7 +37,18 @@ After starting the built project, small black window of Unity application should
 
 ### Settings file
 
-During startup, simulation checks for `config.yaml` file. If not found it uses default values and creates file `config.yaml`
+During startup, simulation checks for `config.yaml` file. If not found it uses default values and creates file `config.yaml`  
+important config options:
+- `mode` simulation or dataset
+- `loggingEnabled` if set to `true` logs every Debug.Log() to `debug.log` file
+- `simulationOptions`
+  - `selectedRobot` selected Okon model
+  - `selectedRandomObjects` objects that will be put in water
+  - `fixedDeltaTime` delta time between physics update
+  - `depthMapQuality` JPG quality of depth map
+  - `depthMapScale` base `1280x720px` scaled of depth map
+  - `videoFeedQuality` JPG quality of video feed
+  - `videoFeedScale`base `1280x720px` scaled of video feed
 
 ### Important notes
 
