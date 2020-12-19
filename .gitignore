@@ -75,3 +75,9 @@ crashlytics-build.properties
 
 # Local Work Files
 /LocalWork/
+
+#logging
+/error.log
+/debug.log
+/dataset*
+

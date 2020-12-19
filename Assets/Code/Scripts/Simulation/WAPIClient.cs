@@ -27,6 +27,15 @@ public class WAPIClient
         GET_DETE = 0xDE
     }
 
+    [Flags]
+    private enum Flag
+    {
+        None = 0,
+        SERVER_ECHO = 1,
+        DO_NOT_LOG_PACKET = 2,
+        TEST = 128
+    }
+
     static int clientId = 0;
     public static int connectedClients = 0;
     readonly TcpClient client;
@@ -57,7 +66,7 @@ public class WAPIClient
         stream = client.GetStream();
         stream.ReadTimeout = 1000*60*5;//TODO
         Packet packetType;
-        byte packetFlag;
+        Flag packetFlag;
         string jsonFromClient = "";
         RobotController rc = simulationControllerInstance.robotController;
         while (clientConnected)
@@ -68,7 +77,7 @@ public class WAPIClient
                 {
                     #region JSON_recv
                     packetType = (Packet)ReadByteFromStream(stream);
-                    packetFlag = ReadByteFromStream(stream);
+                    packetFlag = (Flag)ReadByteFromStream(stream);
                     byte[] dataLenBytes = new byte[4];
                     ReadAllFromStream(stream, dataLenBytes, 4);
                     int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
@@ -79,7 +88,7 @@ public class WAPIClient
                     switch (packetType)
                     {
                         case Packet.SET_MTR:
-                            Debug.Log("From client: " + jsonFromClient);
+                            if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log("From client: " + jsonFromClient);
                             var motors = JsonSerializer.Deserialize<JSON.Motors>(jsonFromClient);
                             rc.motorFL.fill = motors.FL;
                             rc.motorFR.fill = motors.FR;
@@ -88,20 +97,20 @@ public class WAPIClient
                             rc.motorMR.fill = motors.MR;
                             break;
                         case Packet.GET_ORIEN:
-                            SendJson(Packet.GET_ORIEN, JsonSerializer.ToJsonString(rc.orientation.Get()));
+                            SendJson(Packet.GET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
                             break;
                         case Packet.SET_ORIEN:
                             rc.orientation.Set(JsonSerializer.Deserialize<JSON.Orientation>(jsonFromClient));
                             break;
                         case Packet.GET_SENS:
-                            SendJson(Packet.GET_SENS, JsonSerializer.ToJsonString(rc.allSensors.Get()));
+                            SendJson(Packet.GET_SENS, packetFlag, JsonSerializer.ToJsonString(rc.allSensors.Get()));
                             break;
                         case Packet.PING:
                             JSON.Ping ping = JsonSerializer.Deserialize<JSON.Ping>(jsonFromClient);
                             long clientTimestamp = ping.timestamp;
                             ping.timestamp = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
                             ping.ping = ping.timestamp - clientTimestamp;
-                            SendJson(Packet.PING, JsonSerializer.ToJsonString(ping));
+                            SendJson(Packet.PING, packetFlag, JsonSerializer.ToJsonString(ping));
                             break;
                         /*case Packet.SET_SIM:
                             Settings settings = new Settings();
@@ -116,12 +125,12 @@ public class WAPIClient
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(detectionWorker);
                             while (!detectionWorker.done) Thread.Sleep(1);
-                            Debug.Log(JsonSerializer.ToJsonString(detection));
-                            SendJson(Packet.GET_DETE, JsonSerializer.ToJsonString(detection));
+                            if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log(JsonSerializer.ToJsonString(detection));
+                            SendJson(Packet.GET_DETE, packetFlag, JsonSerializer.ToJsonString(detection));
                             break;
-                        //case Packet.ACK:
-                          // // SendJson(Packet.ACK, "{\"fps\":" + Mathf.Round(_fps).ToString() + ", \"state\":\"" + state + "\"}");
-                          //  break;
+                        case Packet.ACK:
+                            SendJson(Packet.ACK, packetFlag | Flag.TEST, "{\"info\":\"ack ack\"}");
+                            break;
                         case Packet.GET_DEPTH:
                             byte[] map = new byte[1];
                             MainThreadUpdateWorker depthWorker = new MainThreadUpdateWorker() {
@@ -133,7 +142,7 @@ public class WAPIClient
                             sb.Append("{\"depth\":\"");
                             sb.Append(System.Convert.ToBase64String(map));
                             sb.Append("\"}");
-                            SendJson(Packet.GET_DEPTH, sb.ToString());
+                            SendJson(Packet.GET_DEPTH, packetFlag, sb.ToString());
                             break;
                         case Packet.GET_DEPTH_BYTES:
                             map = new byte[1];
@@ -142,7 +151,7 @@ public class WAPIClient
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
                             while (!depthWorker.done) Thread.Sleep(10);
-                            SendBytes(Packet.GET_DEPTH_BYTES, map);
+                            SendBytes(Packet.GET_DEPTH_BYTES, packetFlag, map);
                             break;
                         case Packet.GET_VIDEO_BYTES:
                             map = new byte[1];
@@ -151,17 +160,18 @@ public class WAPIClient
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
                             while (!depthWorker.done) Thread.Sleep(10);
-                            SendBytes(Packet.GET_VIDEO_BYTES, map);
+                            SendBytes(Packet.GET_VIDEO_BYTES, packetFlag, map);
                             break;
                         case (Packet)0xFF:
                             clientConnected = false;
                             break;
                         default:
                             Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packetType }));
-                            SendJson(Packet.ACK, "{'info':'multi:yes', 'abcd':'You shouldn't get this packet'}");
+                            SendJson(Packet.ACK, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'"+jsonFromClient+"'}");
                             break;
                     }
-                    //SendJson(Packet.ACK, "{'fromClient':'"+ jsonFromClient + "'}");
+
+                    if(packetFlag.HasFlag(Flag.SERVER_ECHO)) SendJson(Packet.ACK, "{'fromClient':'"+ jsonFromClient + "'}");
                     #endregion
                 } while (clientConnected && stream.DataAvailable);
             }
@@ -175,6 +185,25 @@ public class WAPIClient
         stream?.Dispose();
         client?.Dispose();
         connectedClients--;
+    }
+
+    void SendJson(Packet packetType, Flag packetFlag, string json)
+    {
+        byte[] bytes = Encoding.ASCII.GetBytes(json);
+        stream.WriteByte((byte)packetType);
+        stream.WriteByte((byte)packetFlag);
+        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
+        stream.Write(bytes, 0, bytes.Length);
+        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+    }
+
+    void SendBytes(Packet packetType, Flag packetFlag, byte[] bytes)
+    {
+        stream.WriteByte((byte)packetType);
+        stream.WriteByte((byte)packetFlag);
+        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
+        stream.Write(bytes, 0, bytes.Length);
+        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
     }
 
     void SendJson(Packet packetType, string json)
