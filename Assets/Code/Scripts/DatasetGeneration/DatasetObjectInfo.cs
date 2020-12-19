@@ -212,7 +212,6 @@ public class DatasetObjectInfo : MonoBehaviour
             if (RenderSettings.fog)
             {
                 visibilityInfo.colorPercentVisible = 1f / Mathf.Exp(visibilityInfo.distance * RenderSettings.fogDensity);
-
                 if (Settings.config.datasetOptions.checkFogVisibility)
                     visibilityInfo.visible = visibilityInfo.colorPercentVisible >= Settings.config.datasetOptions.minObjectColorPercentVisible;
                 else

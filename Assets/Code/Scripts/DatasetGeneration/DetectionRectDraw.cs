@@ -12,8 +12,6 @@ public class DetectionRectDraw : MonoBehaviour
     Detector detector;
     GUIStyle style;
 
-   
-
     void Start()
     {
         detector = new Detector();
@@ -60,7 +58,8 @@ public class DetectionRectDraw : MonoBehaviour
             GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize, 200, 200), "d: " + Math.Round(info.distance, 1) + "m", style);
             GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize*2, 200, 200), "v: " + info.visible.ToString(), style);
             GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize*3, 200, 200), "c: " + Math.Round(info.colorPercentVisible*100f, 2) + "%", style);
-            GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize*4, 200, 200), "i: " +info.includeInDataset.ToString(), style);
+            GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize*4, 200, 200), "i: " + info.includeInDataset.ToString(), style);
+            GUI.Label(new Rect(info.min.x * Camera.main.pixelWidth, Camera.main.pixelHeight - info.max.y * Camera.main.pixelHeight+ style.fontSize*5, 200, 200), "f: " + RenderSettings.fogDensity.ToString(), style);
         }
     }
 

@@ -172,18 +172,20 @@ public class DatasetGeneratorController : MonoBehaviour
                         string txtFileName = datasetRootPath + @"/" + singleObject.GetComponent<DatasetObjectInfo>().className + @"/" + createdFramesPerClass[className].ToString() + ".txt";
                         string pngFileName = datasetRootPath + @"/" + singleObject.GetComponent<DatasetObjectInfo>().className + @"/" + createdFramesPerClass[className].ToString() + ".png";
                         string trainFileName = datasetRootPath + @"/train.txt";
-                        if(detector.detection[0].includeInDataset) File.WriteAllText(txtFileName, detector.detection[0].GetTextInfo());
+                        if (detector.detection[0].includeInDataset) File.WriteAllText(txtFileName, detector.detection[0].GetTextInfo());
                         else File.WriteAllText(txtFileName, "");
                         File.AppendAllText(trainFileName, pngFileName + System.Environment.NewLine);
-                        if (!Settings.config.datasetOptions.debugOptions.disableScreenshot) ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
+                        if (!Settings.config.datasetOptions.debugOptions.disableScreenshot)
+                            ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
                         createdFramesPerClass[className]++;
                         Debug.Log("detected " + createdFramesPerClass[className] + "/" + Settings.config.datasetOptions.objectVisibleFrameNum * selectedObjects.Count);
                         createdTypeFrames++;
 
-                        if (Settings.config.datasetOptions.debugOptions.logDetection) File.AppendAllText(datasetRootPath + @"/log.dat", detector.detection[0].distance + " " + detector.detection[0].fill + System.Environment.NewLine);
+                        if (Settings.config.datasetOptions.debugOptions.logDetection) 
+                            File.AppendAllText(datasetRootPath + @"/log.dat", detector.detection[0].distance + " " + detector.detection[0].fill + System.Environment.NewLine);
                     }
 
-                    RandomizeGraphics(cameraObject.GetComponent<Camera>());
+                    StartCoroutine(RandomizeGraphics(cameraObject.GetComponent<Camera>()));
 
                     if (createdTypeFrames >= Settings.config.datasetOptions.objectVisibleFrameNum)
                     {
@@ -238,13 +240,17 @@ public class DatasetGeneratorController : MonoBehaviour
 
                     cameraObject.transform.position = DatasetObjectInfo.GetRandomWorldPosistionInBoundary(cameraObject, selectedWaterContainer);
                     LookRandomly(cameraObject, 20f, 180f, 30f);
-                    RandomizeGraphics(cameraObject.GetComponent<Camera>());
+                    StartCoroutine(RandomizeGraphics(cameraObject.GetComponent<Camera>()));
                     var detector = new Detector();
 
                     string detectedObjectsText = "";
                     foreach (var info in detector.Detect(cameraObject.GetComponent<Camera>()))
                     {
-                        if (!info.visible || info.fill < Settings.config.datasetOptions.minObjectFill || DatasetObjectInfo.BoundaryIsColliding(cameraObject, info.gameObject)) continue;//TODO sprawdz nową kolizję
+                        if (!info.visible ||
+                            info.fill < Settings.config.datasetOptions.minObjectFill ||
+                            DatasetObjectInfo.BoundaryIsColliding(cameraObject, info.gameObject)) continue;//TODO sprawdz nową kolizję
+
+
                         if(info.includeInDataset)detectedObjectsText += info.GetTextInfo() + System.Environment.NewLine;
                     }
                     string datasetRootPath = Settings.config.datasetOptions.datasetDirPath;
@@ -273,7 +279,7 @@ public class DatasetGeneratorController : MonoBehaviour
                 }
             case GenerationState.NoObjects:
                 {
-                    RandomizeGraphics(cameraObject.GetComponent<Camera>());
+                    StartCoroutine(RandomizeGraphics(cameraObject.GetComponent<Camera>()));
                     cameraObject.transform.position = DatasetObjectInfo.GetRandomWorldPosistionInBoundary(cameraObject, selectedWaterContainer);
                     LookRandomly(cameraObject, Settings.config.datasetOptions.cameraLookRandomlyPitchOffset, Random.Range(0f, 360f), Settings.config.datasetOptions.cameraLookRandomlyRollOffset);
 
@@ -327,8 +333,9 @@ public class DatasetGeneratorController : MonoBehaviour
         looker.transform.rotation = Quaternion.Euler(rot);
     }
 
-    public void RandomizeGraphics(Camera camera)
+    public IEnumerator RandomizeGraphics(Camera camera)
     {
+        yield return new WaitForEndOfFrame();
         camera.focalLength = Settings.config.datasetOptions.graphicsOptions.cameraFocalLength;
         camera.sensorSize = new Vector2(Settings.config.datasetOptions.graphicsOptions.cameraSensorSize[0], Settings.config.datasetOptions.graphicsOptions.cameraSensorSize[1]);
 
@@ -373,6 +380,7 @@ public class DatasetGeneratorController : MonoBehaviour
                 camera.backgroundColor = back;
             }
         }
+        yield return null;
     }
 
     public void LookRandomly(GameObject looker, float pitchOffset, float yawOffset, float rollOffset) => looker.transform.rotation = Quaternion.Euler(new Vector3(Random.Range(-pitchOffset, pitchOffset), Random.Range(-yawOffset, yawOffset), Random.Range(-rollOffset, rollOffset)));
