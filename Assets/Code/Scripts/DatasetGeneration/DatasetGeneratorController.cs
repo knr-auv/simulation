@@ -250,7 +250,6 @@ public class DatasetGeneratorController : MonoBehaviour
                             info.fill < Settings.config.datasetOptions.minObjectFill ||
                             DatasetObjectInfo.BoundaryIsColliding(cameraObject, info.gameObject)) continue;//TODO sprawdz nową kolizję
 
-
                         if(info.includeInDataset)detectedObjectsText += info.GetTextInfo() + System.Environment.NewLine;
                     }
                     string datasetRootPath = Settings.config.datasetOptions.datasetDirPath;
@@ -261,7 +260,6 @@ public class DatasetGeneratorController : MonoBehaviour
                     File.AppendAllText(trainFileName, pngFileName + System.Environment.NewLine);
                     ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
                     createdFramesPerClass["multiple"]++;
-
                     break;
                 }
             case GenerationState.NoObjectsSetup:

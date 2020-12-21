@@ -18,11 +18,11 @@ datasetOptions:
   selectedObjects: [gate4, diver1]
   selectedWaterContainer: waterpool1
   objectVisibleFrameNum: 20
-  objectMultipleFrameNum: 0
+  objectMultipleFrameNum: 50
   objectBlankFrameNum: 3
   minCameraDistanceToObject: 0
   maxCameraDistanceToObject: 30
-  minObjectFill: 0.01499999989
+  minObjectFill: 0.01
   minObjectColorPercentVisible: 0.149999997     
   checkFogVisibility: true
   percentClosest: 0.050000006 
