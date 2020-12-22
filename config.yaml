@@ -1,10 +1,10 @@
-mode: dataset
+mode: simulation
 loggingEnabled: false
 simulationOptions:
   videoPort: 44209
   webAPIPort: 44210
   videoQuality: 60
-  selectedWaterContainer: waterpool1
+  selectedWaterContainer: waterpool3
   selectedRobot: okon2
   selectedRandomObjects: [gate2, tripod1, diver1, flareRed1, flareYellow1]
   fixedDeltaTime: 0.001
