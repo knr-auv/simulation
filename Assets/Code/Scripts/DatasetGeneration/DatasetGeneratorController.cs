@@ -96,6 +96,14 @@ public class DatasetGeneratorController : MonoBehaviour
         System.IO.File.Create(Settings.config.datasetOptions.datasetDirPath + @"\train.txt");
 
         generationState = GenerationState.SingleObjectsSetup;
+
+        int classDetectedFrameNum = 0;
+        int classMultipleFrameNum = 0;
+        int classObstacleFrameNum = 0;
+        foreach (var obj in selectedObjects)
+            if (obj.GetComponent<DatasetObjectInfo>().includeInDataset) classDetectedFrameNum++;
+            else classObstacleFrameNum++;
+        //TODO: check if all number where satisfied during generation
     }
 
     bool TryGetObjectByTypeName(string typeName, out GameObject obj)
@@ -187,7 +195,7 @@ public class DatasetGeneratorController : MonoBehaviour
 
                     StartCoroutine(RandomizeGraphics(cameraObject.GetComponent<Camera>()));
 
-                    if (createdTypeFrames >= Settings.config.datasetOptions.objectVisibleFrameNum)
+                    if (createdTypeFrames >= Settings.config.datasetOptions.objectVisibleFrameNum / selectedObjects.Count)
                     {
                         Debug.Log("Finished object index:" + currentObjectIndex + "  " + (currentObjectIndex + 1) + "/" + selectedObjects.Count);
                         generationState = GenerationState.SingleObjectsSetup;
