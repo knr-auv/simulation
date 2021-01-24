@@ -38,6 +38,8 @@ public class DatasetGeneratorController : MonoBehaviour
     List<GameObject> knownObjects;
     GameObject selectedWaterContainer;
     Dictionary<string, int> createdFramesPerClass;
+    Dictionary<string, int> objectsNumInClass = new Dictionary<string, int>();
+    public int counter = 0;
 
     enum GenerationState
     {
@@ -97,13 +99,27 @@ public class DatasetGeneratorController : MonoBehaviour
 
         generationState = GenerationState.SingleObjectsSetup;
 
-        int classDetectedFrameNum = 0;
-        int classMultipleFrameNum = 0;
-        int classObstacleFrameNum = 0;
+        // classes
+        
+       
+        
+
         foreach (var obj in selectedObjects)
-            if (obj.GetComponent<DatasetObjectInfo>().includeInDataset) classDetectedFrameNum++;
-            else classObstacleFrameNum++;
-        //TODO: check if all number where satisfied during generation
+        {
+            var info = obj.GetComponent<DatasetObjectInfo>();
+            if (IncludeInDataset(obj))
+            {
+                if (!objectsNumInClass.ContainsKey(info.className)) objectsNumInClass.Add(info.className, 1);
+                else objectsNumInClass[obj.GetComponent<DatasetObjectInfo>().className]++;
+            }
+            else
+            {
+                if (!objectsNumInClass.ContainsKey("OBSTACLE")) objectsNumInClass.Add("OBSTACLE", 1);
+                else objectsNumInClass["OBSTACLE"]++;
+            }
+        }
+
+
     }
 
     bool TryGetObjectByTypeName(string typeName, out GameObject obj)
@@ -138,7 +154,7 @@ public class DatasetGeneratorController : MonoBehaviour
             case GenerationState.SingleObjectsSetup:
                 {
                     ClearSceneFromObjects();
-                    if (Settings.config.datasetOptions.objectVisibleFrameNum == 0)
+                    if (Settings.config.datasetOptions.classObstacleFrameNum == 0 && Settings.config.datasetOptions.classDetectedFrameNum == 0)
                     {
                         generationState = GenerationState.MultipleObjectsSetup;
                         return;
@@ -146,12 +162,16 @@ public class DatasetGeneratorController : MonoBehaviour
                     Instantiate(selectedObjects[currentObjectIndex]);
                     Debug.Log("Clearing scene for S.O. Creating object index: " + currentObjectIndex);
                     generationState = GenerationState.SingleObjects;
-                    createdTypeFrames = 0;
 
+                    var info = selectedObjects[currentObjectIndex].GetComponent<DatasetObjectInfo>();
+                    if (IncludeInDataset(selectedObjects[currentObjectIndex])) counter = Settings.config.datasetOptions.classDetectedFrameNum / objectsNumInClass[info.className];
+                    else counter = Settings.config.datasetOptions.classObstacleFrameNum * Settings.config.datasetOptions.classNames.Count / objectsNumInClass["OBSTACLE"];
+                    
                     for (int i = 0; i < selectedObjects.Count; i++)
                     {
-                        string objectName = selectedObjects[i].GetComponent<DatasetObjectInfo>().className;
-                        Directory.CreateDirectory(Settings.config.datasetOptions.datasetDirPath + @"\" + objectName);
+                        string className = selectedObjects[i].GetComponent<DatasetObjectInfo>().className;
+                        if(IncludeInDataset(selectedObjects[i]))Directory.CreateDirectory(Settings.config.datasetOptions.datasetDirPath + @"\" + className);
+                        else Directory.CreateDirectory(Settings.config.datasetOptions.datasetDirPath + @"\" + "obstacle");
                     }
 
                     break;
@@ -160,6 +180,8 @@ public class DatasetGeneratorController : MonoBehaviour
                 {
                     GameObject singleObject = GameObject.FindGameObjectWithTag("ToDetect");
                     string className = singleObject.GetComponent<DatasetObjectInfo>().className;
+                    if (!IncludeInDataset(singleObject)) className = "obstacle";
+
 
                     singleObject.transform.rotation = Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 0f));
                     singleObject.transform.position = DatasetObjectInfo.GetRandomWorldPosistionInBoundary(singleObject, selectedWaterContainer);
@@ -177,25 +199,30 @@ public class DatasetGeneratorController : MonoBehaviour
                     {
                         string datasetRootPath = Settings.config.datasetOptions.datasetDirPath;
 
-                        string txtFileName = datasetRootPath + @"/" + singleObject.GetComponent<DatasetObjectInfo>().className + @"/" + createdFramesPerClass[className].ToString() + ".txt";
-                        string pngFileName = datasetRootPath + @"/" + singleObject.GetComponent<DatasetObjectInfo>().className + @"/" + createdFramesPerClass[className].ToString() + ".png";
+                        string txtFileName = datasetRootPath + @"/" + className + @"/" + createdFramesPerClass[className].ToString() + ".txt";
+                        string pngFileName = datasetRootPath + @"/" + className + @"/" + createdFramesPerClass[className].ToString() + ".png";
                         string trainFileName = datasetRootPath + @"/train.txt";
-                        if (detector.detection[0].includeInDataset) File.WriteAllText(txtFileName, detector.detection[0].GetTextInfo());
+                        if (IncludeInDataset(detector.detection[0].gameObject)) File.WriteAllText(txtFileName, detector.detection[0].GetTextInfo());
                         else File.WriteAllText(txtFileName, "");
                         File.AppendAllText(trainFileName, pngFileName + System.Environment.NewLine);
                         if (!Settings.config.datasetOptions.debugOptions.disableScreenshot)
                             ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
                         createdFramesPerClass[className]++;
-                        Debug.Log("detected " + createdFramesPerClass[className] + "/" + Settings.config.datasetOptions.objectVisibleFrameNum * selectedObjects.Count);
+                       // Debug.Log("detected " + createdFramesPerClass[className] + "/" + Settings.config.datasetOptions.objectVisibleFrameNum * selectedObjects.Count);
+                        Debug.Log("detected " + createdFramesPerClass[className] + "/" + 7 * selectedObjects.Count);
                         createdTypeFrames++;
-
+                        counter--;
                         if (Settings.config.datasetOptions.debugOptions.logDetection) 
                             File.AppendAllText(datasetRootPath + @"/log.dat", detector.detection[0].distance + " " + detector.detection[0].fill + System.Environment.NewLine);
                     }
 
                     StartCoroutine(RandomizeGraphics(cameraObject.GetComponent<Camera>()));
 
-                    if (createdTypeFrames >= Settings.config.datasetOptions.objectVisibleFrameNum / selectedObjects.Count)
+                   
+
+
+                    
+                    if (counter <= 0)
                     {
                         Debug.Log("Finished object index:" + currentObjectIndex + "  " + (currentObjectIndex + 1) + "/" + selectedObjects.Count);
                         generationState = GenerationState.SingleObjectsSetup;
@@ -210,7 +237,8 @@ public class DatasetGeneratorController : MonoBehaviour
             case GenerationState.MultipleObjectsSetup:
                 {
                     ClearSceneFromObjects();
-                    if (Settings.config.datasetOptions.objectMultipleFrameNum == 0)
+                   // if (Settings.config.datasetOptions.objectMultipleFrameNum == 0)
+                    if (1 == 0)
                     {
                         generationState = GenerationState.NoObjectsSetup;
                         return;
@@ -225,19 +253,20 @@ public class DatasetGeneratorController : MonoBehaviour
                         randomObject.transform.position = DatasetObjectInfo.GetRandomWorldPosistionInBoundary(randomObject, selectedWaterContainer);
                         randomObjectsInScene.Add(randomObject);
                     }
-                    createdFramesPerClass["multiple"] = 0;
+                    counter = Settings.config.datasetOptions.classMultipleFrameNum * Settings.config.datasetOptions.classNames.Count;
                     if (!Directory.Exists(Settings.config.datasetOptions.datasetDirPath + @"/multiple")) Directory.CreateDirectory(Settings.config.datasetOptions.datasetDirPath + @"/multiple");
                     generationState = GenerationState.MultipleObjects;
                 }
                 break;
             case GenerationState.MultipleObjects:
                 {
-                    if (createdFramesPerClass["multiple"] >= Settings.config.datasetOptions.objectMultipleFrameNum)
+                  if (counter <= 0)
                     {
                         generationState = GenerationState.NoObjectsSetup;
                         return;
                     }
-
+                    //
+                    int detectedVisibleObjectsNum = 0;
                     foreach (var obj in randomObjectsInScene)
                     {
                         obj.SetActive(Random.value > 0.5f);
@@ -258,27 +287,33 @@ public class DatasetGeneratorController : MonoBehaviour
                             info.fill < Settings.config.datasetOptions.minObjectFill ||
                             DatasetObjectInfo.BoundaryIsColliding(cameraObject, info.gameObject)) continue;//TODO sprawdz nową kolizję
 
-                        if(info.includeInDataset)detectedObjectsText += info.GetTextInfo() + System.Environment.NewLine;
+                        if(IncludeInDataset(info.gameObject)) detectedObjectsText += info.GetTextInfo() + System.Environment.NewLine;
+                        detectedVisibleObjectsNum++;
                     }
-                    string datasetRootPath = Settings.config.datasetOptions.datasetDirPath;
-                    string txtFileName = datasetRootPath + @"/" + "multiple" + @"/" + createdFramesPerClass["multiple"].ToString() + ".txt";
-                    string pngFileName = datasetRootPath + @"/" + "multiple" + @"/" + createdFramesPerClass["multiple"].ToString() + ".png";
-                    string trainFileName = datasetRootPath + @"/train.txt";
-                    File.WriteAllText(txtFileName, detectedObjectsText);
-                    File.AppendAllText(trainFileName, pngFileName + System.Environment.NewLine);
-                    ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
-                    createdFramesPerClass["multiple"]++;
+
+                    if(detectedVisibleObjectsNum >= Settings.config.datasetOptions.minVisibleMultipleObjectsNum)
+                    {
+                        string datasetRootPath = Settings.config.datasetOptions.datasetDirPath;
+                        string txtFileName = datasetRootPath + @"/" + "multiple" + @"/" + createdFramesPerClass["multiple"].ToString() + ".txt";
+                        string pngFileName = datasetRootPath + @"/" + "multiple" + @"/" + createdFramesPerClass["multiple"].ToString() + ".png";
+                        string trainFileName = datasetRootPath + @"/train.txt";
+                        File.WriteAllText(txtFileName, detectedObjectsText);
+                        File.AppendAllText(trainFileName, pngFileName + System.Environment.NewLine);
+                        ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
+                        createdFramesPerClass["multiple"]++;
+                        counter--;
+                    }
                     break;
                 }
             case GenerationState.NoObjectsSetup:
                 {
                     ClearSceneFromObjects();
-                    if (Settings.config.datasetOptions.objectBlankFrameNum == 0)
+                    if (Settings.config.datasetOptions.classBlankFrameNum == 0)
                     {
                         generationState = GenerationState.Finished;
                         return;
                     }
-                    createdFramesPerClass["blank"] = 0;
+                    counter = Settings.config.datasetOptions.classBlankFrameNum * Settings.config.datasetOptions.classNames.Count;
                     generationState = GenerationState.NoObjects;
                     if (!Directory.Exists(Settings.config.datasetOptions.datasetDirPath + @"/blank")) Directory.CreateDirectory(Settings.config.datasetOptions.datasetDirPath + @"/blank");
                     break;
@@ -298,7 +333,8 @@ public class DatasetGeneratorController : MonoBehaviour
                     ScreenCapture.CaptureScreenshot(System.IO.Directory.GetCurrentDirectory() + "/" + pngFileName);
                     createdFramesPerClass["blank"]++;
                 }
-                if (createdFramesPerClass["blank"] >= Settings.config.datasetOptions.objectBlankFrameNum)
+               // if (createdFramesPerClass["blank"] >= Settings.config.datasetOptions.objectBlankFrameNum)
+                if (--counter <= 0)
                 {
                     Debug.Log("Finished all no objects frames");
                     generationState = GenerationState.Finished;
@@ -319,6 +355,14 @@ public class DatasetGeneratorController : MonoBehaviour
 
                 break;
         }
+    }
+    
+    public bool IncludeInDataset(GameObject obj)
+    {
+        var info = obj.GetComponent<DatasetObjectInfo>();
+        foreach (var className in Settings.config.datasetOptions.classNames)
+            if (info.className == className) return true;
+        return false;
     }
 
     public void ClearSceneFromObjects()

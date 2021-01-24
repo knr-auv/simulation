@@ -1,4 +1,4 @@
-mode: simulation
+mode: dataset
 loggingEnabled: false
 simulationOptions:
   videoPort: 44209
@@ -14,12 +14,14 @@ simulationOptions:
   videoFeedScale: 0.5
   
 datasetOptions:
-  classNames: [gate, obstacle]
-  selectedObjects: [gate4, diver1]
+  classNames: [gate, flareRed]
+  selectedObjects: [gate4, diver1, gate2, flareRed1, tripod1]
   selectedWaterContainer: waterpool1
-  objectVisibleFrameNum: 20
-  objectMultipleFrameNum: 50
-  objectBlankFrameNum: 3
+  classDetectedFrameNum: 6
+  classMultipleFrameNum: 7 
+  classBlankFrameNum: 9
+  classObstacleFrameNum: 10
+  minVisibleMultipleObjectsNum: 2
   minCameraDistanceToObject: 0
   maxCameraDistanceToObject: 30
   minObjectFill: 0.01

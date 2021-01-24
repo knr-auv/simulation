@@ -32,10 +32,6 @@ public class Config
         }
         else if (mode == "dataset")
         {
-            if (datasetOptions.objectVisibleFrameNum < 0)
-                throw new Exception("objectVisibleFrameNum must be greater than 0, not " + datasetOptions.objectVisibleFrameNum);
-            if (datasetOptions.objectBlankFrameNum < 0)
-                throw new Exception("objectBlankFrameNum must be greater or equal 0, not " + datasetOptions.objectBlankFrameNum);
             if (datasetOptions.datasetDirPath == null)
                 throw new Exception("datasetFilePath cannot be null");
             if (Directory.Exists(Settings.config.datasetOptions.datasetDirPath))
@@ -62,9 +58,6 @@ public class Config
 
         datasetOptions = new DatasetOptions()
         {
-            objectVisibleFrameNum = 10,
-            objectMultipleFrameNum = 10,
-            objectBlankFrameNum = 10,
             minCameraDistanceToObject = 0,
             maxCameraDistanceToObject = 30,
             minObjectFill = .005f,
@@ -137,9 +130,11 @@ public class DatasetOptions
     public List<string> classNames { get; set; }
     public List<string> selectedObjects { get; set; }
     public string selectedWaterContainer { get; set; }
-    public int objectVisibleFrameNum { get; set; }
-    public int objectMultipleFrameNum { get; set; }
-    public int objectBlankFrameNum { get; set; }
+    public int classDetectedFrameNum { get; set; }
+    public int classMultipleFrameNum { get; set; }
+    public int classBlankFrameNum { get; set; }
+    public int classObstacleFrameNum { get; set; }
+    public int minVisibleMultipleObjectsNum { get; set; }
     public int minCameraDistanceToObject { get; set; }
     public int maxCameraDistanceToObject { get; set; }
     public float minObjectFill { get; set; }

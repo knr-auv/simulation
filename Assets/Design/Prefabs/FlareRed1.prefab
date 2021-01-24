@@ -242,7 +242,7 @@ MonoBehaviour:
   center: {x: 0, y: 0.01, z: 0}
   size: {x: 0.1, y: 1, z: 0.1}
   BoundarySize: {x: 0.1, y: 1, z: 0.1}
-  className: obstacle
+  className: flareRed
   typeName: flareRed1
   testPoints: []
   visiblePoints: 
