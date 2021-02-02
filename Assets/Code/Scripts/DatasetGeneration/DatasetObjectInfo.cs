@@ -21,23 +21,21 @@ public class DatasetObjectInfo : MonoBehaviour
     public string className;
     [SerializeField]
     public string typeName;
-    
+    [SerializeField]
+    public int testPointsNum = 1000;
+
     public List<Vector3> testPoints;
     public List<bool> visiblePoints;
     private Rigidbody rb = new Rigidbody();
-    private void Start()
-    {
-        testPoints = new List<Vector3>();
-        visiblePoints = new List<bool>();
-        if (!isCamera && !isWaterContainer)
-            GenerateTestPointsUniform(Settings.config.datasetOptions.testPointsNum);
-    }
 
     public void GenerateTestPointsNonUniform(int n)
     {
         testPoints?.Clear();
         visiblePoints?.Clear();
-        
+
+        testPoints = new List<Vector3>();
+        visiblePoints = new List<bool>();
+
         MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
         foreach (MeshFilter meshFilter in meshFilters)
         {
@@ -80,6 +78,8 @@ public class DatasetObjectInfo : MonoBehaviour
     {
         testPoints?.Clear();
         visiblePoints?.Clear();
+        testPoints = new List<Vector3>();
+        visiblePoints = new List<bool>();
 
         MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
         foreach (MeshFilter meshFilter in meshFilters)
@@ -87,36 +87,6 @@ public class DatasetObjectInfo : MonoBehaviour
             Mesh mesh = meshFilter.sharedMesh;
             GameObject currentObject = meshFilter.gameObject;
             int len = mesh.triangles.Length;
-            if(len > 5000)//Optimize big meshes
-            {
-                for (int j = 0; j < n / meshFilters.Length; j++)
-                {
-                    int i = Random.Range(0, len / 3) * 3;
-
-                    Vector3 p1 = mesh.vertices[mesh.triangles[i + 0]];
-                    Vector3 p2 = mesh.vertices[mesh.triangles[i + 1]];
-                    Vector3 p3 = mesh.vertices[mesh.triangles[i + 2]];
-
-                    float t = Random.value;
-                    float u = Random.value;
-                    if (t + u >= 1)
-                    {
-                        t = 1 - t;
-                        u = 1 - u;
-                    }
-
-                    Vector3 pointOnMesh = p1 + t * (p2 - p1) + u * (p3 - p1);
-                    pointOnMesh.Scale(currentObject.transform.lossyScale);
-                    pointOnMesh = currentObject.transform.rotation * pointOnMesh;
-                    pointOnMesh += currentObject.transform.position;
-
-                    pointOnMesh = transform.InverseTransformPoint(pointOnMesh);
-
-                    testPoints.Add(pointOnMesh);
-                    visiblePoints.Add(false);
-                }
-                continue;
-            }
             double[] triangleArea = new double[len/3];
             double totalArea = 0;
 

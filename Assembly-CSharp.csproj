@@ -57,7 +57,6 @@
   <ItemGroup>
     <Compile Include="Assets\Design\Scenes\SampleScenes\Scripts\LevelReset.cs" />
     <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
-    <Compile Include="Assets\Code\Scripts\Utility\MainController.cs" />
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetGeneratorController.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\Robot\Okon2Modules.cs" />
     <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\PauseMenu.cs" />
@@ -66,6 +65,7 @@
     <Compile Include="Assets\Code\Scripts\Utility\Config.cs" />
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\DetectionRectDraw.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\WaterBehaviour.cs" />
+    <Compile Include="Assets\Code\Scripts\Start\LoggerController.cs" />
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\Detector.cs" />
     <Compile Include="Assets\Design\Scenes\SampleScenes\Scripts\CameraSwitch.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\SimulationController.cs" />
@@ -80,7 +80,6 @@
     <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetObjectInfo.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\JSON.cs" />
     <Compile Include="Assets\Code\Scripts\Simulation\Robot\RobotController.cs" />
-    <Compile Include="Assets\Code\Scripts\Start\LoggerController.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\Packages\System.Threading.Tasks.Extensions.4.4.0\LICENSE.TXT" />

@@ -52,7 +52,6 @@ public class DetectionRectDraw : MonoBehaviour
         if (!doDrawRect) return;
         int detected = 0;
        
-        
         foreach (var info in detector.Detect(Camera.main))
         {
             if (!info.visibleInFrame) continue;

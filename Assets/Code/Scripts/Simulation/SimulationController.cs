@@ -105,7 +105,6 @@ public class SimulationController : MonoBehaviour
         wapiThread.Start();
     }
 
-
     void Update()
     {
         while (mainThreadUpdateWorkers.Count > 0)

@@ -1,4 +1,4 @@
-mode: dataset
+mode: simulation
 loggingEnabled: false
 simulationOptions:
   videoPort: 44209

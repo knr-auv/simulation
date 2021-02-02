@@ -28,7 +28,7 @@ public class WaterBehaviour : MonoBehaviour
             Vector3 dragForce = reynoldsNumber < 1 ? T1 : T2;
 
             Vector3 volumeCenterForce = Vector3.zero;
-            volumeCenterForce += buoyancyForce * Mathf.Min(transform.position.y / -0.2f, 1f);//partial submersion
+            volumeCenterForce += buoyancyForce * Mathf.Min(transform.position.y / -0.2f, 1f);//TODO partial submersion
             volumeCenterForce += dragForce;
             rigidbody.AddForceAtPosition(volumeCenterForce, transform.position + transform.rotation * volumeCenterOffset, ForceMode.Force);
 

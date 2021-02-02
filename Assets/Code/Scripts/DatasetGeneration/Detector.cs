@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Detector
 {
-    //public List<GameObject> objectsInScene;
     public List<VisibilityInfo> detection;
 
     public List<VisibilityInfo> Detect(Camera camera)

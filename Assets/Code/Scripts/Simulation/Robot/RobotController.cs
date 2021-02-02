@@ -69,6 +69,7 @@ abstract public class Module
     public Quaternion rotation;
     public static RobotController rc;
     abstract public void FixedUpdate();
+
     virtual public void DrawGizmos()
     {
         Gizmos.color = Color.gray;
