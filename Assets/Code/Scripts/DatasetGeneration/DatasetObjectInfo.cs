@@ -196,7 +196,6 @@ public class DatasetObjectInfo : MonoBehaviour
                visibilityInfo.visible = true;
             }
         }
-        //TODO optimalization
         return visibilityInfo;
     }
 

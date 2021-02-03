@@ -26,14 +26,14 @@ public class DetectionRectDraw : MonoBehaviour
     void OnPostRender()
     {
         if (!doDrawRect) return;
+        GL.PushMatrix();
+        GL.LoadOrtho();
+        GL.Begin(GL.LINES);
+        material.SetPass(0);
+        GL.Color(new Color(0f, 0f, 0f, 1f));
         foreach (var info in detector.Detect(Camera.main))
         {
             if (!info.visibleInFrame) continue;
-            GL.PushMatrix();
-            GL.LoadOrtho();
-            GL.Begin(GL.LINES);
-            material.SetPass(0);
-            GL.Color(new Color(0f, 0f, 0f, 1f));
             GL.Vertex(new Vector3(info.min.x, info.min.y, 0));
             GL.Vertex(new Vector3(info.min.x, info.max.y, 0));
             GL.Vertex(new Vector3(info.min.x, info.max.y, 0));
@@ -42,9 +42,9 @@ public class DetectionRectDraw : MonoBehaviour
             GL.Vertex(new Vector3(info.max.x, info.min.y, 0));
             GL.Vertex(new Vector3(info.max.x, info.min.y, 0));
             GL.Vertex(new Vector3(info.min.x, info.min.y, 0));
-            GL.End();
-            GL.PopMatrix();
         }
+        GL.End();
+        GL.PopMatrix();
     }
 
     void OnGUI()
