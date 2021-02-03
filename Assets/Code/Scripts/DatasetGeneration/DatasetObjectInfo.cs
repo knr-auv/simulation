@@ -152,25 +152,28 @@ public class DatasetObjectInfo : MonoBehaviour
         };
         if (isCamera || isWaterContainer) return visibilityInfo;
 
-        visibilityInfo.distance = (camera.gameObject.transform.position - gameObject.transform.position).magnitude;
+        visibilityInfo.distance = (camera.gameObject.transform.position - gameObject.transform.position).magnitude;//TODO based on points
 
+        var projectionToScreenMatrix = Matrix4x4.TRS(
+            new Vector3(0.5f, 0.5f, 0),
+            Quaternion.identity,
+            new Vector3(0.5f, 0.5f, 1));
+        var local2Screen = projectionToScreenMatrix * camera.projectionMatrix * camera.worldToCameraMatrix * transform.localToWorldMatrix;
+        
         for (int i = 0; i < testPoints.Count; i++)
         {
             visiblePoints[i] = false;
-            Vector3 bPos = camera.WorldToScreenPoint(transform.TransformPoint(testPoints[i]));
-            if (bPos.x < 0f || bPos.x > camera.pixelWidth || bPos.y < 0f || bPos.y > camera.pixelHeight || bPos.z < 0) continue;
+            Vector4 bPos = local2Screen * new Vector4(testPoints[i].x, testPoints[i].y, testPoints[i].z, 1f);
+            if (bPos.x < 0f || bPos.x > bPos.w || bPos.y < 0f || bPos.y > bPos.w || bPos.z < 0) continue;
+            bPos.x /= bPos.w;
+            bPos.y /= bPos.w;
             visibilityInfo.min = Vector2.Min(visibilityInfo.min, bPos);
             visibilityInfo.max = Vector2.Max(visibilityInfo.max, bPos);
             visibilityInfo.visibleInFrame = true;
             visiblePoints[i] = true;
         }
-        visibilityInfo.min.x /= (float)Camera.main.pixelWidth;
-        visibilityInfo.min.y /= (float)Camera.main.pixelHeight;
-        visibilityInfo.max.x /= (float)Camera.main.pixelWidth;
-        visibilityInfo.max.y /= (float)Camera.main.pixelHeight;
-
+       
         visibilityInfo.fill = (visibilityInfo.max - visibilityInfo.min).x * (visibilityInfo.max - visibilityInfo.min).y;
-
         float offset = Settings.config.datasetOptions.objectFillOffset; 
         visibilityInfo.min.x = Mathf.Max(visibilityInfo.min.x - offset, 0.0001f);
         visibilityInfo.min.y = Mathf.Max(visibilityInfo.min.y - offset, 0.0001f);

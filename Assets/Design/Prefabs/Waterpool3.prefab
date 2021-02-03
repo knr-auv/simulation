@@ -73,6 +73,7 @@ MonoBehaviour:
   BoundarySize: {x: 30, y: 2, z: 25}
   className: waterpool
   typeName: waterpool3
+  testPointsNum: 1000
   testPoints: []
   visiblePoints: 
 --- !u!114 &8045590523444351113
@@ -259,6 +260,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tripod1
       objectReference: {fileID: 0}
+    - target: {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651240199818607542, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+      propertyPath: BoundarySize.x
+      value: 0.5400009
+      objectReference: {fileID: 0}
     - target: {fileID: 8651240199818607543, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
       propertyPath: m_LocalPosition.x
       value: -12.9
@@ -317,9 +326,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5985164395214259900}
     m_Modifications:
+    - target: {fileID: 875305796139585914, guid: 3bcb05dd0567ace40829827eda413ff9, type: 3}
+      propertyPath: BoundarySize.x
+      value: 2.0535045
+      objectReference: {fileID: 0}
+    - target: {fileID: 875305796139585914, guid: 3bcb05dd0567ace40829827eda413ff9, type: 3}
+      propertyPath: BoundarySize.z
+      value: 0.9837549
+      objectReference: {fileID: 0}
     - target: {fileID: 1050089577910810972, guid: 3bcb05dd0567ace40829827eda413ff9, type: 3}
       propertyPath: m_Name
       value: Gate3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050089577910810972, guid: 3bcb05dd0567ace40829827eda413ff9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2195410045997127686, guid: 3bcb05dd0567ace40829827eda413ff9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -382,6 +403,18 @@ PrefabInstance:
     - target: {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
       propertyPath: m_Name
       value: Tripod1 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651240199818607497, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651240199818607542, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+      propertyPath: BoundarySize.x
+      value: 0.53999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651240199818607542, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
+      propertyPath: BoundarySize.z
+      value: 0.48999977
       objectReference: {fileID: 0}
     - target: {fileID: 8651240199818607543, guid: 7ba8d82f472762c44a0aeb4b99db11f0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -485,6 +518,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5010327682678381874, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
+      propertyPath: BoundarySize.x
+      value: 1.8003979
+      objectReference: {fileID: 0}
+    - target: {fileID: 5010327682678381874, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
+      propertyPath: BoundarySize.z
+      value: 1.5837431
+      objectReference: {fileID: 0}
     - target: {fileID: 5010327682678381875, guid: 3d7942e58bac1764eaf3e19a9a68c9e4, type: 3}
       propertyPath: m_Name
       value: Gate4
@@ -506,6 +547,10 @@ PrefabInstance:
     - target: {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
       propertyPath: m_Name
       value: Gate2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3739246117021667141, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -551,6 +596,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8209536252130274964, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: BoundarySize.y
+      value: 1.9700003
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209536252130274964, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: BoundarySize.z
+      value: 0.060005903
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
 --- !u!4 &5509986869862790157 stripped
@@ -568,6 +621,10 @@ PrefabInstance:
     - target: {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
       propertyPath: m_Name
       value: Gate2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3739246117021667140, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3739246117021667141, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -612,6 +669,18 @@ PrefabInstance:
     - target: {fileID: 3739246117021667141, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 59.953
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209536252130274964, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: BoundarySize.x
+      value: 1.0935726
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209536252130274964, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: BoundarySize.y
+      value: 1.970056
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209536252130274964, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
+      propertyPath: BoundarySize.z
+      value: 1.8322587
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5408890b57decd74bbca6a519d53ce2c, type: 3}
