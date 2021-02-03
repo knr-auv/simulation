@@ -52,28 +52,40 @@ public class Config
         simulationOptions = new SimulationOptions()
         {
             videoPort = 44209,
+            webAPIPort = 44210,
             videoQuality = 60,
-            webAPIPort = 44210
+            selectedWaterContainer = "waterpool1",
+            fixedDeltaTime = 0.001f,
+            depthMapQuality = 90,
+            depthMapScale = 0.1f,
+            videoFeedQuality = 90,
+            videoFeedScale = 0.5f
         };
 
         datasetOptions = new DatasetOptions()
         {
+            selectedWaterContainer = "waterpool1",
+            classDetectedFrameNum = 11,
+            classMultipleFrameNum = 11,
+            classBlankFrameNum = 11,
+            classObstacleFrameNum = 11,
+            minVisibleMultipleObjectsNum = 2,
             minCameraDistanceToObject = 0,
             maxCameraDistanceToObject = 30,
-            minObjectFill = .005f,
+            minObjectFill = .01f,
+            minObjectColorPercentVisible = 0.15f,
+            checkFogVisibility = true,
+            percentClosest = 0.05f,
+            closestMaxDistanceOffset = 2f,
             objectFillOffset = .01f,
-            datasetDirPath = "dataset",
             overrideDataset = true,
+            datasetDirPath = "dataset",
             cameraLookAtObjectPitchOffset = 30,
             cameraLookAtObjectYawOffset = 30,
             cameraLookAtObjectRollOffset = 30,
             cameraLookRandomlyPitchOffset = 45,
             cameraLookRandomlyRollOffset = 45,
-            testPointsNum = 1000,
-            percentClosest = 0.05f,
-            closestMaxDistanceOffset = 1f,
-            minObjectColorPercentVisible = 0.15f,
-            checkFogVisibility = true
+            testPointsNum = 1000
         };
 
         datasetOptions.graphicsOptions = new GraphicsOptions()
