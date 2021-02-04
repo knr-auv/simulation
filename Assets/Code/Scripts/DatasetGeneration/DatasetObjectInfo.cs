@@ -71,7 +71,6 @@ public class DatasetObjectInfo : MonoBehaviour
             }
             
         }
-        Debug.Log("done generatin points");
     }
 
     public void GenerateTestPointsUniform(int n)

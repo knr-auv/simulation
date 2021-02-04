@@ -1,8 +1,8 @@
 mode: simulation
-loggingEnabled: false
+loggingEnabled: true
 simulationOptions:
   videoPort: 44209
-  webAPIPort: 44210
+  webAPIPort: 44210 
   videoQuality: 60
   selectedWaterContainer: waterpool3
   selectedRobot: okon2

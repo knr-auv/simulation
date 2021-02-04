@@ -79,5 +79,6 @@ crashlytics-build.properties
 #logging
 /error.log
 /debug.log
+/debugSmall.log
 /dataset*
 

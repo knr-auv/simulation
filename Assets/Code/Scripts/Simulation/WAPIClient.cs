@@ -194,7 +194,8 @@ public class WAPIClient
         stream.WriteByte((byte)packetFlag);
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+        if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
+            Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
     }
 
     void SendBytes(Packet packetType, Flag packetFlag, byte[] bytes)
@@ -203,7 +204,8 @@ public class WAPIClient
         stream.WriteByte((byte)packetFlag);
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+        if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
+            Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
     }
 
     void SendJson(Packet packetType, string json)

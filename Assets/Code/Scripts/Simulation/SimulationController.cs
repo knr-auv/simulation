@@ -219,7 +219,7 @@ public class SimulationController : MonoBehaviour
         acceptNewClients = false;
         foreach (KeyValuePair<int, WAPIClient> pair in wapiClients) pair.Value.Stop();
         wapiThread.Abort();
-        Debug.Log("Application ending after " + Time.time + " seconds");
+        Debug.Log("Application ended after " + Time.time + " seconds");
     }
 }
 
