@@ -18,7 +18,7 @@ public class DatasetGeneratorController : MonoBehaviour
     [SerializeField] GameObject gate1;
     [SerializeField] GameObject gate2;
     [SerializeField] GameObject gate3;
-    [SerializeField] GameObject gate4;
+    [SerializeField] GameObject gate4;//TODO add list like in sim
     [SerializeField] GameObject waterpool1;
     [SerializeField] GameObject obstacle1;
     [SerializeField] GameObject tripod1;

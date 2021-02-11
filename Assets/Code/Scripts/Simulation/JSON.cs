@@ -82,7 +82,7 @@ public class JSON : MonoBehaviour
     public class Detection
     {
         public List<DetectedObject> detected;
-    }
+    }   
     
     public class DetectedObject
     {

@@ -21,6 +21,7 @@ public class DetectionRectDraw : MonoBehaviour
             fontStyle = FontStyle.Bold
         };
         style.normal.textColor = Color.white;
+        doDrawRect = Settings.config.datasetOptions.debugOptions.drawDetectionRect;
     }
 
     void OnPostRender()

@@ -1215,7 +1215,7 @@ MonoBehaviour:
   waterDensity: 997
   gravityConstant: 9.81
   massCenterOffset: {x: 0, y: -0.02, z: 0}
-  volumeCenterOffset: {x: 0, y: 0, z: 0}
+  volumeCenterOffset: {x: 0, y: -0.01, z: 0}
   drawGizmos: 1
 --- !u!114 &7500333749225312417
 MonoBehaviour:
@@ -1385,7 +1385,6 @@ GameObject:
   - component: {fileID: 210925762149756290}
   - component: {fileID: 5854496761060101276}
   - component: {fileID: 3618543365453111845}
-  - component: {fileID: 5595935136680550080}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -1472,20 +1471,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 141b5bb76b8b39342a5a787acbeaabfd, type: 2}
   doDrawRect: 1
---- !u!114 &5595935136680550080
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6277921381999687860}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 767cb5721fc1ca8499ff4ec86be005a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  material: {fileID: 0}
-  doDrawRect: 0
 --- !u!1 &8094070667574666887
 GameObject:
   m_ObjectHideFlags: 0
