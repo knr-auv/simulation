@@ -8,10 +8,10 @@ simulationOptions:
   selectedRobot: okon2
   selectedRandomObjects: [gate2, tripod1, diver1, flareRed1, flareYellow1]
   fixedDeltaTime: 0.001
-  depthMapQuality: 90
-  depthMapScale: 0.1
+  depthMapQuality: 100
+  depthMapScale: 1.0
   videoFeedQuality: 90
-  videoFeedScale: 0.5
+  videoFeedScale: 1.0
   
 datasetOptions:
   classNames: [gate, flareRed]

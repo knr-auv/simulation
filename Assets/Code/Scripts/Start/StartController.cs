@@ -61,7 +61,7 @@ public class StartController : MonoBehaviour
             Application.Quit();
             #endif
         }
-        else if (configCorrect && Input.GetKey(KeyCode.Return))
+        else if (configCorrect /*&&*/|| Input.GetKey(KeyCode.Return))
         {
             if (Settings.config.mode == "simulation") SceneManager.LoadScene("Simulation");
             if (Settings.config.mode == "dataset") SceneManager.LoadScene("DatasetGeneration");

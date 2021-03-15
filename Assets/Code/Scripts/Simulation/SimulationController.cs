@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -131,6 +132,10 @@ public class SimulationController : MonoBehaviour
         tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
         RenderTexture.active = null;
         ret = tex.EncodeToJPG(Settings.config.simulationOptions.depthMapQuality);
+        /*
+        byte[] x = tex.GetRawTextureData();
+        Debug.Log(x.Length);
+        Debug.Log(x.Length / (w*h));*/
         Destroy(tex);
         return ret;
     }
