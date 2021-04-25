@@ -61,6 +61,8 @@ public class DatasetGeneratorController : MonoBehaviour
             return;//TODO take config
         }
 
+        Application.targetFrameRate = 5;
+
         postDebug = cameraObject.GetComponent<PostProcessDebug>();
         postLayer = cameraObject.GetComponent<PostProcessLayer>();
         postVolume = cameraObject.GetComponent<PostProcessVolume>();

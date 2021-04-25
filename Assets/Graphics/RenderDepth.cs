@@ -35,7 +35,6 @@ public class RenderDepth : MonoBehaviour
             return;
         }
 
-        // turn on depth rendering for the camera so that the shader can access it via _CameraDepthTexture
         Camera.main.depthTextureMode = DepthTextureMode.Depth;
     }
 

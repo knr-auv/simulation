@@ -13,12 +13,13 @@ public class StartController : MonoBehaviour
 {
     [SerializeField]
     Text console;
+    private int counter = 100;
 
     private bool configCorrect;
     
     void Start()
     {
-        Screen.SetResolution(1280, 720, false, 61);
+        Screen.SetResolution(1280/2, 720/2, false, 40);
         //Settings.Init();TODO
         //Settings.Log("Initializing");
         configCorrect = true;
@@ -61,7 +62,7 @@ public class StartController : MonoBehaviour
             Application.Quit();
             #endif
         }
-        else if (configCorrect /*&&*/|| Input.GetKey(KeyCode.Return))
+        else if (counter-- <= 0 && configCorrect /*&&*/|| Input.GetKey(KeyCode.Return))
         {
             if (Settings.config.mode == "simulation") SceneManager.LoadScene("Simulation");
             if (Settings.config.mode == "dataset") SceneManager.LoadScene("DatasetGeneration");

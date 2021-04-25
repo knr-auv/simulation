@@ -90,11 +90,14 @@ public class WAPIClient
                         case Packet.SET_MTR:
                             if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log("From client: " + jsonFromClient);
                             var motors = JsonSerializer.Deserialize<JSON.Motors>(jsonFromClient);
-                            rc.motorFL.fill = motors.FL;
-                            rc.motorFR.fill = motors.FR;
-                            rc.motorB.fill = motors.B;
-                            rc.motorML.fill = motors.ML;
-                            rc.motorMR.fill = motors.MR;
+                            rc.motorFLH.fill = motors.FLH;
+                            rc.motorFLV.fill = motors.FLV;
+                            rc.motorBLV.fill = motors.BLV;
+                            rc.motorBLH.fill = motors.BLH;
+                            rc.motorFRH.fill = motors.FRH;
+                            rc.motorFRV.fill = motors.FRV;
+                            rc.motorBRV.fill = motors.BRV;
+                            rc.motorBRH.fill = motors.BRH;
                             break;
                         case Packet.GET_ORIEN:
                             SendJson(Packet.GET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
@@ -156,10 +159,31 @@ public class WAPIClient
                         case Packet.GET_VIDEO_BYTES:
                             map = new byte[1];
                             depthWorker = new MainThreadUpdateWorker() {
-                                action = () => { map = simulationControllerInstance.GetVideo(); }
+
+                                action = () => {
+                                     map = simulationControllerInstance.GetVideo();
+                                  /*  UnityEngine.Rendering.AsyncGPUReadback.Request(new ComputeBuffer(1,1), (req) =>
+                                    {
+                                        int w = 1280, h = 720;
+                                        var newTex = new Texture2D
+                                        (
+                                            w,
+                                            h,
+                                            TextureFormat.RGB24,
+                                            false
+                                        );
+
+                                        newTex.LoadRawTextureData(req.GetData<uint>());
+
+                                        newTex.Apply();
+
+                                        map = ImageConversion.EncodeToPNG(newTex);
+                                    });*/
+                                }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
-                            while (!depthWorker.done) Thread.Sleep(10);
+                            while (map.Length == 1) Thread.Sleep(2);
+                            //while (!depthWorker.done) Thread.Sleep(10);
                             SendBytes(Packet.GET_VIDEO_BYTES, packetFlag, map);
                             break;
                         case (Packet)0xFF:

@@ -14,7 +14,7 @@ public class RobotController : MonoBehaviour
     [SerializeField] public Vector3 checkerRotation;
     public Rigidbody rb;
 
-    public Motor motorFL, motorFR, motorML, motorMR, motorB;
+    public Motor motorFLH, motorFLV, motorBLV, motorBLH, motorFRH, motorFRV, motorBRV, motorBRH;
     public Accelerometer accelerometer;
     public Gyroscope gyroscpe;
     public Barometer barometer;
@@ -34,11 +34,14 @@ public class RobotController : MonoBehaviour
         gyroscpe = new Gyroscope(this);
         barometer = new Barometer(this);
         allSensors = new AllSensors(this);
-        motorFL = new Motor(this) { position = new Vector3(-1f, 0f, 1), rotation = Quaternion.Euler(new Vector3(-90f,0f,0f)) };
-        motorFR = new Motor(this) { position = new Vector3(1f, 0f, 1), rotation = Quaternion.Euler(new Vector3(-90f,0f,0f)) };
-        motorML = new Motor(this) { position = new Vector3(-1f, 0f, .5f), rotation = Quaternion.Euler(new Vector3(0f,0f,0f)) };
-        motorMR = new Motor(this) { position = new Vector3(1f, 0f, .5f), rotation = Quaternion.Euler(new Vector3(0f,0f,0f)) };
-        motorB = new Motor(this)  { position = new Vector3(0f, 0f, -1f), rotation = Quaternion.Euler(new Vector3(-90f,0f,0f)) };
+        motorFLH =  new Motor(this) { position = new Vector3(-0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f,30f,0f)) };
+        motorFLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f,0f,0f)) };
+        motorBLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
+        motorBLH = new Motor(this) { position = new Vector3(-0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, 150f, 0f)) };
+        motorFRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f, -30f, 0f)) };
+        motorFRV = new Motor(this) { position = new Vector3(0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
+        motorBRV = new Motor(this) { position = new Vector3(0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
+        motorBRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, -150f, 0f)) };
     }
 
     void FixedUpdate()
@@ -107,6 +110,7 @@ public class Motor : Module
     float Force()
     {
         if (rc.transform.TransformPoint(position).y >= 0) return 0f;
+        fill = fill > 1f ? 1f : fill < -1f ? -1f : fill;
         float x = Map(fill, -1f, 1f, 1100f, 1900f);
         if (fill > 0) return Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
         else return -Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
@@ -121,11 +125,11 @@ public class Motor : Module
     override public void DrawGizmos()
     {
         Gizmos.color = Color.blue;
-        if (Force() > 0) Gizmos.color = Color.red;
-        if (Force() < 0) Gizmos.color = Color.green;
+        if (Force() > 0) Gizmos.color = Color.green;
+        if (Force() < 0) Gizmos.color = Color.red;
         if (rc.transform.TransformPoint(position).y >= 0) Gizmos.color = Color.gray;
         Gizmos.DrawLine(rc.transform.TransformPoint(position), rc.transform.TransformPoint(position - rotation * Vector3.forward * Force()/20f));
-        Gizmos.DrawCube(rc.transform.TransformPoint(position), Vector3.one * 0.05f);
+        Gizmos.DrawSphere(rc.transform.TransformPoint(position), 0.05f / 2f);
     }
 
     float Map(float x, float a, float b, float c, float d) => c + (x - a) * (d - c) / (b - a);

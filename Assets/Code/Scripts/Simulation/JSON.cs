@@ -6,7 +6,7 @@ public class JSON : MonoBehaviour
 {
     public class Motors
     {
-        public float FL, FR, ML, MR, B;
+        public float FLH, FLV, BLV, BLH, FRH, FRV, BRV, BRH;
     }
 
     public class Sensors

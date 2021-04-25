@@ -4,23 +4,23 @@ simulationOptions:
   videoPort: 44209
   webAPIPort: 44210 
   videoQuality: 60
-  selectedWaterContainer: waterpool3
+  selectedWaterContainer: waterpool4
   selectedRobot: okon2
-  selectedRandomObjects: [gate2, tripod1, diver1, flareRed1, flareYellow1]
-  fixedDeltaTime: 0.001
+  selectedRandomObjects: []
+  fixedDeltaTime: 0.01
   depthMapQuality: 100
   depthMapScale: 1.0
-  videoFeedQuality: 90
+  videoFeedQuality: 75
   videoFeedScale: 1.0
   
 datasetOptions:
-  classNames: [gate, flareRed]
-  selectedObjects: [gate4, diver1, gate2, flareRed1, tripod1]
+  classNames: [gate]
+  selectedObjects: [gate2]
   selectedWaterContainer: waterpool1
-  classDetectedFrameNum: 6
-  classMultipleFrameNum: 7 
-  classBlankFrameNum: 9
-  classObstacleFrameNum: 10
+  classDetectedFrameNum: 20
+  classMultipleFrameNum: 0 
+  classBlankFrameNum: 0
+  classObstacleFrameNum: 0
   minVisibleMultipleObjectsNum: 2
   minCameraDistanceToObject: 0
   maxCameraDistanceToObject: 30
@@ -69,7 +69,7 @@ datasetOptions:
     - 4.80000019
     - 3.5999999
   debugOptions:
-    drawDetectionRect: false
+    drawDetectionRect: true
     drawPostProcessDebug: false
     disableScreenshot: false
     logDetection: true
