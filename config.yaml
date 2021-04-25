@@ -9,7 +9,7 @@ simulationOptions:
   selectedRandomObjects: []
   fixedDeltaTime: 0.01
   depthMapQuality: 100
-  depthMapScale: 1.0
+  depthMapScale: 0.1
   videoFeedQuality: 75
   videoFeedScale: 1.0
   

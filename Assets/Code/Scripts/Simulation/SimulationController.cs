@@ -110,17 +110,18 @@ public class SimulationController : MonoBehaviour
 
     IEnumerator StartCapture()
     {
+        yield return new WaitForSeconds(2);
         if (robotController.depthCamera.targetTexture.width != (int)Math.Round(1280 * Settings.config.simulationOptions.depthMapScale))
         {
             if (robotController.depthCamera.targetTexture != null) robotController.depthCamera.activeTexture.Release();
             robotController.depthCamera.targetTexture = new RenderTexture((int)Math.Round(1280 * Settings.config.simulationOptions.depthMapScale), (int)Math.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
         }
 
-      /*  if (robotController.colorCamera.targetTexture.width != (int)Math.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
+        if (robotController.colorCamera.targetTexture.width != (int)Math.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
         {
             if (robotController.colorCamera.targetTexture != null) robotController.colorCamera.activeTexture.Release();
             robotController.colorCamera.targetTexture = new RenderTexture((int)Math.Round(1280 * Settings.config.simulationOptions.videoFeedScale), (int)Math.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
-        }*/
+        }
 
         while (true)
         {

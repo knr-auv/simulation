@@ -19,7 +19,7 @@ public class StartController : MonoBehaviour
     
     void Start()
     {
-        Screen.SetResolution(1280/2, 720/2, false, 40);
+        Screen.SetResolution(1280, 720  , false, 60);
         //Settings.Init();TODO
         //Settings.Log("Initializing");
         configCorrect = true;
@@ -64,7 +64,11 @@ public class StartController : MonoBehaviour
         }
         else if (counter-- <= 0 && configCorrect /*&&*/|| Input.GetKey(KeyCode.Return))
         {
-            if (Settings.config.mode == "simulation") SceneManager.LoadScene("Simulation");
+            if (Settings.config.mode == "simulation")
+            {
+                Screen.SetResolution(1280 / 2, 720 / 2, false, 40);
+                SceneManager.LoadScene("Simulation");
+            }
             if (Settings.config.mode == "dataset") SceneManager.LoadScene("DatasetGeneration");
         }
     }
