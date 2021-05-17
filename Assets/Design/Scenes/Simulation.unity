@@ -183,11 +183,14 @@ MonoBehaviour:
   - {fileID: 1881995280087384245, guid: a9bc8f174978ecc4b9b866fa369cbc9d, type: 3}
   - {fileID: 4970177127550745795, guid: a00501f8c6f741b468f787d93150aa1a, type: 3}
   - {fileID: 2677716390902683653, guid: f725f18564a1d964dbde6305379556ca, type: 3}
+  - {fileID: 5455729281327230713, guid: c6bcc9e75139fff4bbcac193d5258b81, type: 3}
   robotController: {fileID: 0}
   depthMapBytes: 
   getDepthImage: 0
   depthImageReady: 0
   acceptNewClients: 0
+  colorBytes: 
+  depthBytes: 
 --- !u!1 &437292842
 GameObject:
   m_ObjectHideFlags: 0

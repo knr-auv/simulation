@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -61,6 +61,31 @@ public class SimulationController : MonoBehaviour
         {
             robot = Instantiate(robotPrefab, new Vector3(0, 2, 0), Quaternion.identity);
             robotController = robot.GetComponent<RobotController>();
+            var startZones = GameObject.FindGameObjectsWithTag("StartZone");
+            if(startZones.Length > 0)
+            {
+                System.Random r = new System.Random();
+                int i = r.Next(0, startZones.Length - 1);
+                var startZone = startZones[i];
+
+                DatasetObjectInfo elementInfo = robot.GetComponent<DatasetObjectInfo>();
+                var elementSize = elementInfo.GetBoundarySize();
+                var bounds = startZone.GetComponent<Collider>().bounds;
+
+                var containerMin = bounds.min;
+                var containerMax = bounds.max;
+
+                Vector3 transformedCenterOffset = robot.transform.TransformDirection(elementInfo.center);
+                float x = Random.Range(containerMin.x + elementSize.x / 2f - transformedCenterOffset.x, containerMax.x - elementSize.x / 2f - transformedCenterOffset.x);
+                float y = Random.Range(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y, containerMax.y - elementSize.y / 2f - transformedCenterOffset.y);
+                float z = Random.Range(containerMin.z + elementSize.z / 2f - transformedCenterOffset.z, containerMax.z - elementSize.z / 2f - transformedCenterOffset.z);
+                if (-(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y) + (containerMax.y - elementSize.y / 2f - transformedCenterOffset.y) < 0)
+                    y = containerMin.y + elementSize.y / 2f - transformedCenterOffset.y;
+                robot.transform.position = new Vector3(x, 1, z);
+                float direction = startZone.GetComponent<StartZoneController>().angle;
+                float fov = startZone.GetComponent<StartZoneController>().fov;
+                robot.transform.rotation = Quaternion.Euler(0, Random.Range(direction - fov/2, direction + fov/2), 0);
+            }
         }
 
         List<string> selectedRandomObjectsNames = Settings.config.simulationOptions.selectedRandomObjects;
@@ -111,16 +136,16 @@ public class SimulationController : MonoBehaviour
     IEnumerator StartCapture()
     {
         yield return new WaitForSeconds(2);
-        if (robotController.depthCamera.targetTexture.width != (int)Math.Round(1280 * Settings.config.simulationOptions.depthMapScale))
+        if (robotController.depthCamera.targetTexture.width != (int)Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale))
         {
             if (robotController.depthCamera.targetTexture != null) robotController.depthCamera.activeTexture.Release();
-            robotController.depthCamera.targetTexture = new RenderTexture((int)Math.Round(1280 * Settings.config.simulationOptions.depthMapScale), (int)Math.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
+            robotController.depthCamera.targetTexture = new RenderTexture((int)Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale), (int)Mathf.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
         }
 
-        if (robotController.colorCamera.targetTexture.width != (int)Math.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
+        if (robotController.colorCamera.targetTexture.width != (int)Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
         {
             if (robotController.colorCamera.targetTexture != null) robotController.colorCamera.activeTexture.Release();
-            robotController.colorCamera.targetTexture = new RenderTexture((int)Math.Round(1280 * Settings.config.simulationOptions.videoFeedScale), (int)Math.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
+            robotController.colorCamera.targetTexture = new RenderTexture((int)Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale), (int)Mathf.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
         }
 
         while (true)
@@ -276,7 +301,7 @@ public class SimulationController : MonoBehaviour
 public class MainThreadUpdateWorker
 {
     public volatile bool done;
-    public Action action;
+    public System.Action action;
     public MainThreadUpdateWorker()
     {
         done = false;

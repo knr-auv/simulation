@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - ToDetect
+  - StartZone
+  - Checkpoint
+  - NoGoZone
+  - FinishZone
   layers:
   - Default
   - TransparentFX

@@ -34,14 +34,15 @@ public class RobotController : MonoBehaviour
         gyroscpe = new Gyroscope(this);
         barometer = new Barometer(this);
         allSensors = new AllSensors(this);
-        motorFLH =  new Motor(this) { position = new Vector3(-0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f,30f,0f)) };
-        motorFLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f,0f,0f)) };
-        motorBLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
-        motorBLH = new Motor(this) { position = new Vector3(-0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, 150f, 0f)) };
-        motorFRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f, -30f, 0f)) };
-        motorFRV = new Motor(this) { position = new Vector3(0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
-        motorBRV = new Motor(this) { position = new Vector3(0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)) };
-        motorBRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, -150f, 0f)) };
+        motorFLH =  new Motor(this) { position = new Vector3(-0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f,30f,0f)), isClockwise = false};
+        motorBLH = new Motor(this) { position = new Vector3(-0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, 150f, 0f)), isClockwise = false };
+        motorFRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, 0.2389f), rotation = Quaternion.Euler(new Vector3(0f, -30f, 0f)), isClockwise = true };
+        motorBRH = new Motor(this) { position = new Vector3(0.193f, 0.0937f, -0.2151f), rotation = Quaternion.Euler(new Vector3(0f, -150f, 0f)), isClockwise = true };
+
+        motorFLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = true };
+        motorBLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = true };
+        motorFRV = new Motor(this) { position = new Vector3(0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = false };
+        motorBRV = new Motor(this) { position = new Vector3(0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = false };
     }
 
     void FixedUpdate()
@@ -106,20 +107,29 @@ abstract public class Module
 public class Motor : Module
 {
     public float fill;
+    public float radius = 0.05f;
+    public bool isClockwise = false;
+
     readonly float a = 1.66352902e-8f, b = -0.00003994119f, c = 0.00752234546f, d = 22.4126993334f;
     float Force()
     {
         if (rc.transform.TransformPoint(position).y >= 0) return 0f;
         fill = fill > 1f ? 1f : fill < -1f ? -1f : fill;
         float x = Map(fill, -1f, 1f, 1100f, 1900f);
-        if (fill > 0) return Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
-        else return -Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
+       //  if (fill > 0) return Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
+       //  else return -Mathf.Max(0f, a * x * x * x + b * x * x + c * x + d);
+        if (x < 1472) return x * x * -0.0000180414f + x * 0.0591933468f - 48.035f;
+        if (x > 1528) return x * x * 0.0000281376f - x * 0.0799177935f + 56.449759077f;
+        return 0f;
     }
-
+    
     public override void FixedUpdate()
     {
-        if(fill != 0f && rc.transform.TransformPoint(position).y < 0)
-            rc.rb.AddForceAtPosition(rc.transform.TransformDirection(rotation * Vector3.forward * Force()), rc.transform.TransformPoint(position), ForceMode.Force);
+        if (fill == 0f || rc.transform.TransformPoint(position).y > 0) return;
+        float force = Force();
+        rc.rb.AddForceAtPosition(rc.transform.TransformDirection(rotation * Vector3.forward * force), rc.transform.TransformPoint(position), ForceMode.Force);
+        Vector3 torque = new Vector3(0, 0, 2f * force * radius * (isClockwise ? 1f : -1f));
+        rc.rb.AddRelativeTorque(rotation * torque, ForceMode.Force);
     }
 
     override public void DrawGizmos()

@@ -8,24 +8,24 @@ using UnityEngine;
 using Utf8Json;
 public class WAPIClient
 {
-    private enum Packet : byte
-    {
-        SET_MTR = 0xA0,
-        GET_SENS = 0xB0,
-        GET_DEPTH = 0xB1,
-        GET_DEPTH_BYTES = 0xB2,
-        GET_VIDEO_BYTES = 0xB3,
-        SET_SIM = 0xC0,
-        ACK = 0xC1,
-        GET_ORIEN = 0xC2,
-        SET_ORIEN = 0xC3,
-        REC_STRT = 0xD0,
-        REC_ST = 0xD1,
-        REC_RST = 0xD2,
-        GET_REC = 0xD3,
-        PING = 0xC5,
-        GET_DETE = 0xDE
-    }
+private enum Packet : byte
+{
+    SET_MTR = 0xA0,
+    GET_SENS = 0xB0,
+    GET_DEPTH = 0xB1,
+    GET_DEPTH_BYTES = 0xB2,
+    GET_VIDEO_BYTES = 0xB3,
+    SET_SIM = 0xC0,
+    ACK = 0xC1,
+    GET_ORIEN = 0xC2,
+    SET_ORIEN = 0xC3,
+    REC_STRT = 0xD0,
+    REC_ST = 0xD1,
+    REC_RST = 0xD2,
+    GET_REC = 0xD3,
+    PING = 0xC5,
+    GET_DETE = 0xDE
+}
 
     [Flags]
     private enum Flag

@@ -4,14 +4,14 @@ simulationOptions:
   videoPort: 44209
   webAPIPort: 44210 
   videoQuality: 60
-  selectedWaterContainer: waterpool4
+  selectedWaterContainer: level1
   selectedRobot: okon2
   selectedRandomObjects: []
-  fixedDeltaTime: 0.01
+  fixedDeltaTime: 0.05
   depthMapQuality: 100
   depthMapScale: 0.1
   videoFeedQuality: 75
-  videoFeedScale: 1.0
+  videoFeedScale: .5
   
 datasetOptions:
   classNames: [gate]
