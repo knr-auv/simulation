@@ -23,45 +23,13 @@ Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simula
 
 ---
 
-## Usage
-
-### Startup
-
-After starting the built project, small black window of Unity application should appear. It will show info regarding configuration file `config.yaml`. Follow instructions on the screen. Simulation is now running and clients can connect.  Make sure that in `config.yaml` mode is equal to `simulation`
-
-### Settings file
-
-During startup, simulation checks for `config.yaml` file. If not found it uses default values and creates file `config.yaml`  
-important config options:
-- `mode` simulation or dataset
-- `loggingEnabled` if set to `true` logs every Debug.Log() to `debug.log` file
-- `simulationOptions`
-  - `selectedRobot` selected Okon model
-  - `selectedRandomObjects` objects that will be put in water
-  - `fixedDeltaTime` delta time between physics update
-  - `depthMapQuality` JPG quality of depth map
-  - `depthMapScale` base `1280x720px` scaled of depth map
-  - `videoFeedQuality` JPG quality of video feed
-  - `videoFeedScale`base `1280x720px` scaled of video feed
-
-### Important notes
-
-- JSON must use `"` character, not `'`.
-- Video request packet `0x69` is only 1 byte long
-- Data length is in little endian
-- Not all packets data is JSON (string), some have binary data
-
-## Networking
-
-Information on Github Wiki page
-
 ## Simulation
 
 Simulation uses Unity physics engine with a script that implements fluid dynamics. Also 3d model of the robot is added for correct collisions with objects.
 
 ### Physics
 
-Physics in Unity by default is accurate enough for games. For this simulation accuracy was improved by decreasing physics time step to `7` milliseconds.
+Physics in Unity by default is accurate enough for games. For this simulation accuracy was improved by decreasing physics time step.
 
 #### Thrusters
 
