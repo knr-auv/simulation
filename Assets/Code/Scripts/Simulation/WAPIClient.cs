@@ -6,34 +6,54 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 using Utf8Json;
+using System.Collections.Concurrent;
+
 public class WAPIClient
 {
-private enum Packet : byte
-{
-    SET_MTR = 0xA0,
-    GET_SENS = 0xB0,
-    GET_DEPTH = 0xB1,
-    GET_DEPTH_BYTES = 0xB2,
-    GET_VIDEO_BYTES = 0xB3,
-    SET_SIM = 0xC0,
-    ACK = 0xC1,
-    GET_ORIEN = 0xC2,
-    SET_ORIEN = 0xC3,
-    REC_STRT = 0xD0,
-    REC_ST = 0xD1,
-    REC_RST = 0xD2,
-    GET_REC = 0xD3,
-    PING = 0xC5,
-    GET_DETE = 0xDE
-}
+    public enum PacketType : byte
+    {
+        SET_MTR = 0xA0,
+        GET_SENS = 0xB0,
+        GET_DEPTH = 0xB1,
+        GET_DEPTH_BYTES = 0xB2,
+        GET_VIDEO_BYTES = 0xB3,
+        SET_SIM = 0xC0,
+        ACK = 0xC1,
+        GET_ORIEN = 0xC2,
+        SET_ORIEN = 0xC3,
+        RST_SIM = 0xC4,
+        PING = 0xC5,
+        GET_CPS = 0xC6,
+        HIT_NGZ = 0xC7,
+        HIT_FZ = 0xC8,
+        REC_STRT = 0xD0,
+        REC_ST = 0xD1,
+        REC_RST = 0xD2,
+        GET_REC = 0xD3,
+        GET_DETE = 0xDE
+    }
 
     [Flags]
-    private enum Flag
+    public enum Flag
     {
         None = 0,
         SERVER_ECHO = 1,
         DO_NOT_LOG_PACKET = 2,
         TEST = 128
+    }
+
+    public struct Packet
+    {
+        public PacketType packetType;
+        public Flag flag;
+        public byte[] bytes;
+
+        public Packet(PacketType packetType, Flag flag, byte[] bytes)
+        {
+            this.packetType = packetType;
+            this.flag = flag;
+            this.bytes = bytes;
+        }
     }
 
     static int clientId = 0;
@@ -45,6 +65,7 @@ private enum Packet : byte
     readonly SimulationController simulationControllerInstance;
     bool clientConnected;
     readonly StringBuilder sb = new StringBuilder();
+    private ConcurrentQueue<Packet> toSend;
 
     public WAPIClient(TcpClient client, SimulationController simulationControllerInstance)
     {
@@ -53,6 +74,8 @@ private enum Packet : byte
         connectedClients++;
         this.simulationControllerInstance = simulationControllerInstance;
         clientConnected = true;
+
+        toSend = new ConcurrentQueue<Packet>();
 
         talking = new Thread(HandleJsonClient)
         {
@@ -64,19 +87,19 @@ private enum Packet : byte
     void HandleJsonClient()
     {
         stream = client.GetStream();
-        stream.ReadTimeout = 1000*60*5;//TODO
-        Packet packetType;
+        stream.ReadTimeout = 1000 * 60 * 5;//TODO
+        PacketType packetType;
         Flag packetFlag;
         string jsonFromClient = "";
         RobotController rc = simulationControllerInstance.robotController;
-        while (clientConnected)
+        try
         {
-            try
+            while (clientConnected)
             {
-                do
+                if (stream.DataAvailable)
                 {
                     #region JSON_recv
-                    packetType = (Packet)ReadByteFromStream(stream);
+                    packetType = (PacketType)ReadByteFromStream(stream);
                     packetFlag = (Flag)ReadByteFromStream(stream);
                     byte[] dataLenBytes = new byte[4];
                     ReadAllFromStream(stream, dataLenBytes, 4);
@@ -84,10 +107,30 @@ private enum Packet : byte
                     byte[] dataFromClient = new byte[dataLength];
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
-                    
+
                     switch (packetType)
                     {
-                        case Packet.SET_MTR:
+                        case PacketType.RST_SIM:
+                            MainThreadUpdateWorker resetWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => { GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().PlaceRobotInStartZone(); }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(resetWorker);
+                            break;
+                        case PacketType.GET_CPS:
+                            string ret = "[";
+                            MainThreadUpdateWorker checkpointWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => {
+                                    foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))
+                                        ret += "{\"id\":\"" + obj.GetComponent<CheckpointController>().id + "\",reached:" + obj.GetComponent<CheckpointController>().reached + "}";
+
+                                    EnqueuePacket(PacketType.GET_CPS, packetFlag, ret + "]");
+                                }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(checkpointWorker);
+                            break;
+                        case PacketType.SET_MTR:
                             if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log("From client: " + jsonFromClient);
                             var motors = JsonSerializer.Deserialize<JSON.Motors>(jsonFromClient);
                             rc.motorFLH.fill = motors.FLH;
@@ -99,119 +142,126 @@ private enum Packet : byte
                             rc.motorBRV.fill = motors.BRV;
                             rc.motorBRH.fill = motors.BRH;
                             break;
-                        case Packet.GET_ORIEN:
-                            SendJson(Packet.GET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
+                        case PacketType.GET_ORIEN:
+                            EnqueuePacket(PacketType.GET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
                             break;
-                        case Packet.SET_ORIEN:
+                        case PacketType.SET_ORIEN:
                             rc.orientation.Set(JsonSerializer.Deserialize<JSON.Orientation>(jsonFromClient));
                             break;
-                        case Packet.GET_SENS:
-                            SendJson(Packet.GET_SENS, packetFlag, JsonSerializer.ToJsonString(rc.allSensors.Get()));
+                        case PacketType.GET_SENS:
+                            EnqueuePacket(PacketType.GET_SENS, packetFlag, JsonSerializer.ToJsonString(rc.allSensors.Get()));
                             break;
-                        case Packet.PING:
+                        case PacketType.PING:
                             JSON.Ping ping = JsonSerializer.Deserialize<JSON.Ping>(jsonFromClient);
                             long clientTimestamp = ping.timestamp;
                             ping.timestamp = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
                             ping.ping = ping.timestamp - clientTimestamp;
-                            SendJson(Packet.PING, packetFlag, JsonSerializer.ToJsonString(ping));
+                            EnqueuePacket(PacketType.PING, packetFlag, JsonSerializer.ToJsonString(ping));
                             break;
                         /*case Packet.SET_SIM:
                             Settings settings = new Settings();
                             TryJsonToObjectState(jsonFromClient, settings);
                             quality = settings.quality;
                             break;*/
-                        case Packet.GET_DETE:
+                        case PacketType.GET_DETE:
                             JSON.Detection detection = new JSON.Detection();
                             MainThreadUpdateWorker detectionWorker = new MainThreadUpdateWorker()
                             {
-                                action = () => { detection = simulationControllerInstance.GetDetection(); }
+                                action = () => { 
+                                    detection = simulationControllerInstance.GetDetection();
+                                    EnqueuePacket(PacketType.GET_DETE, packetFlag, JsonSerializer.ToJsonString(detection));
+                                    if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log(JsonSerializer.ToJsonString(detection));
+                                }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(detectionWorker);
-                            while (!detectionWorker.done) Thread.Sleep(1);
-                            if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET)) Debug.Log(JsonSerializer.ToJsonString(detection));
-                            SendJson(Packet.GET_DETE, packetFlag, JsonSerializer.ToJsonString(detection));
                             break;
-                        case Packet.ACK:
-                            SendJson(Packet.ACK, packetFlag | Flag.TEST, "{\"info\":\"ack ack\"}");
+                        case PacketType.ACK:
+                            EnqueuePacket(PacketType.ACK, packetFlag | Flag.TEST, "{\"info\":\"ack ack\"}");
                             break;
-                        case Packet.GET_DEPTH:
+                        case PacketType.GET_DEPTH:
                             byte[] map = new byte[1];
-                            MainThreadUpdateWorker depthWorker = new MainThreadUpdateWorker() {
-                                action = () => { map = simulationControllerInstance.GetDepthMap(); }
-                            };
-                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
-                            while (!depthWorker.done) Thread.Sleep(10);
-                            sb.Clear();
-                            sb.Append("{\"depth\":\"");
-                            sb.Append(System.Convert.ToBase64String(map));
-                            sb.Append("\"}");
-                            SendJson(Packet.GET_DEPTH, packetFlag, sb.ToString());
-                            break;
-                        case Packet.GET_DEPTH_BYTES:
-                            map = new byte[1];
-                            depthWorker = new MainThreadUpdateWorker() {
-                                action = () => { map = simulationControllerInstance.GetDepthMap(); }
-                            };
-                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
-                            while (!depthWorker.done) Thread.Sleep(10);
-                            SendBytes(Packet.GET_DEPTH_BYTES, packetFlag, map);
-                            break;
-                        case Packet.GET_VIDEO_BYTES:
-                            map = new byte[1];
-                            depthWorker = new MainThreadUpdateWorker() {
-
-                                action = () => {
-                                     map = simulationControllerInstance.GetVideo();
-                                  /*  UnityEngine.Rendering.AsyncGPUReadback.Request(new ComputeBuffer(1,1), (req) =>
-                                    {
-                                        int w = 1280, h = 720;
-                                        var newTex = new Texture2D
-                                        (
-                                            w,
-                                            h,
-                                            TextureFormat.RGB24,
-                                            false
-                                        );
-
-                                        newTex.LoadRawTextureData(req.GetData<uint>());
-
-                                        newTex.Apply();
-
-                                        map = ImageConversion.EncodeToPNG(newTex);
-                                    });*/
+                            MainThreadUpdateWorker depthWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => { 
+                                    map = simulationControllerInstance.GetDepthMap();
+                                    EnqueuePacket(PacketType.GET_DEPTH, packetFlag, "{\"depth\":\"" + System.Convert.ToBase64String(map) + "\"}");
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
-                            while (map.Length == 1) Thread.Sleep(2);
-                            //while (!depthWorker.done) Thread.Sleep(10);
-                            SendBytes(Packet.GET_VIDEO_BYTES, packetFlag, map);
                             break;
-                        case (Packet)0xFF:
+                        case PacketType.GET_DEPTH_BYTES:
+                            map = new byte[1];
+                            depthWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => { 
+                                    map = simulationControllerInstance.GetDepthMap();
+                                    EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map);
+                                }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
+                            break;
+                        case PacketType.GET_VIDEO_BYTES:
+                            map = new byte[1];
+                            depthWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () =>
+                                {
+                                    map = simulationControllerInstance.GetVideo();
+                                    /*  UnityEngine.Rendering.AsyncGPUReadback.Request(new ComputeBuffer(1,1), (req) =>
+                                      {
+                                          int w = 1280, h = 720;
+                                          var newTex = new Texture2D
+                                          (
+                                              w,
+                                              h,
+                                              TextureFormat.RGB24,
+                                              false
+                                          );
+
+                                          newTex.LoadRawTextureData(req.GetData<uint>());
+
+                                          newTex.Apply();
+
+                                          map = ImageConversion.EncodeToPNG(newTex);
+                                      });*/
+                                    EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map);
+                                }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
+                            break;
+                        case (PacketType)0xFF:
                             clientConnected = false;
                             break;
+                        
                         default:
                             Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packetType }));
-                            SendJson(Packet.ACK, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'"+jsonFromClient+"'}");
+                            SendJson(PacketType.ACK, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'" + jsonFromClient + "'}");
                             break;
                     }
 
-                    if(packetFlag.HasFlag(Flag.SERVER_ECHO)) SendJson(Packet.ACK, "{'fromClient':'"+ jsonFromClient + "'}");
+                    if (packetFlag.HasFlag(Flag.SERVER_ECHO)) EnqueuePacket(PacketType.ACK, Flag.None, "{'fromClient':'" + jsonFromClient + "'}");
                     #endregion
-                } while (clientConnected && stream.DataAvailable);
-            }
-            catch(Exception exp)    
-            {
-                Debug.LogError("Json client exception\n" + jsonFromClient + "\n"  + exp.Message + '\n' + exp.StackTrace);
-                clientConnected = false;
+                }
+                
+                while (!toSend.IsEmpty) if (toSend.TryDequeue(out Packet packet)) Send(packet.packetType, packet.flag, packet.bytes);
             }
         }
+        catch (Exception exp)
+        {
+            Debug.LogError("Json client exception\n" + jsonFromClient + "\n" + exp.Message + '\n' + exp.StackTrace);
+            clientConnected = false;
+        }
+
         Debug.Log("Json client disconnected");
         stream?.Dispose();
         client?.Dispose();
         connectedClients--;
     }
 
-    void SendJson(Packet packetType, Flag packetFlag, string json)
+    public void EnqueuePacket(PacketType packetType, Flag packetFlag, string json) => toSend.Enqueue(new Packet(packetType, packetFlag, Encoding.ASCII.GetBytes(json)));
+    public void EnqueuePacket(PacketType packetType, Flag packetFlag, byte[] bytes) => toSend.Enqueue(new Packet(packetType, packetFlag, bytes));
+    
+    void Send(PacketType packetType, Flag packetFlag, string json)
     {
         byte[] bytes = Encoding.ASCII.GetBytes(json);
         stream.WriteByte((byte)packetType);
@@ -219,36 +269,36 @@ private enum Packet : byte
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
         if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
-            Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
     }
 
-    void SendBytes(Packet packetType, Flag packetFlag, byte[] bytes)
+    void Send(PacketType packetType, Flag packetFlag, byte[] bytes)
     {
         stream.WriteByte((byte)packetType);
         stream.WriteByte((byte)packetFlag);
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
         if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
-            Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
     }
 
-    void SendJson(Packet packetType, string json)
+    void SendJson(PacketType packetType, string json)
     {
         byte[] bytes = Encoding.ASCII.GetBytes(json);
         stream.WriteByte((byte)packetType);
         stream.WriteByte((byte)0);
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+        Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
     }
 
-    void SendBytes(Packet packetType, byte[] bytes)
+    void SendBytes(PacketType packetType, byte[] bytes)
     {
         stream.WriteByte((byte)packetType);
         stream.WriteByte((byte)0);
         stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
         stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(Packet), packetType) + " len: " + bytes.Length.ToString());
+        Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
     }
 
     public void Stop()
@@ -260,8 +310,8 @@ private enum Packet : byte
     public void ReadAllFromStream(NetworkStream stream, byte[] buffer, int len)
     {
         int current = 0;
-        while (current < buffer.Length) 
-            current += stream.Read(buffer, current, len - current > buffer.Length? buffer.Length : len - current);
+        while (current < buffer.Length)
+            current += stream.Read(buffer, current, len - current > buffer.Length ? buffer.Length : len - current);
     }
 
     private static byte ReadByteFromStream(NetworkStream stream)
@@ -271,4 +321,6 @@ private enum Packet : byte
         while (ret == -1);
         return (byte)ret;
     }
+
+   
 }

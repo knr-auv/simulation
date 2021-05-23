@@ -11,15 +11,17 @@ public class CheckpointController : MonoBehaviour
     public bool reached;
 
 
-    void Start()
-    {
-        reached = false;
-    }
+    void Start() => reached = false;
 
     void OnTriggerEnter(Collider collider)//TODO check if its AUV
     {
         if (reached) return;
         reached = true;
         Debug.Log("checkpoint " + id + " reached");
+    }
+    public void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(GetComponent<Collider>().bounds.center, GetComponent<Collider>().bounds.size);
     }
 }

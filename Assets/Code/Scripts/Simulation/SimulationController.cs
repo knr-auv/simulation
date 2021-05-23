@@ -9,6 +9,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
+using static WAPIClient;
 
 public class SimulationController : MonoBehaviour
 {
@@ -34,8 +35,8 @@ public class SimulationController : MonoBehaviour
     public byte[] depthMapBytes;
     public bool getDepthImage, depthImageReady, acceptNewClients;
 
-    readonly object jsonDictionaryLock = new object();
-    public readonly Dictionary<int, WAPIClient> wapiClients = new Dictionary<int, WAPIClient>();
+    //readonly object jsonDictionaryLock = new object();
+    public readonly ConcurrentDictionary<int, WAPIClient> wapiClients = new ConcurrentDictionary<int, WAPIClient>();
     Thread wapiThread;
     //
 
@@ -61,31 +62,7 @@ public class SimulationController : MonoBehaviour
         {
             robot = Instantiate(robotPrefab, new Vector3(0, 2, 0), Quaternion.identity);
             robotController = robot.GetComponent<RobotController>();
-            var startZones = GameObject.FindGameObjectsWithTag("StartZone");
-            if(startZones.Length > 0)
-            {
-                System.Random r = new System.Random();
-                int i = r.Next(0, startZones.Length - 1);
-                var startZone = startZones[i];
-
-                DatasetObjectInfo elementInfo = robot.GetComponent<DatasetObjectInfo>();
-                var elementSize = elementInfo.GetBoundarySize();
-                var bounds = startZone.GetComponent<Collider>().bounds;
-
-                var containerMin = bounds.min;
-                var containerMax = bounds.max;
-
-                Vector3 transformedCenterOffset = robot.transform.TransformDirection(elementInfo.center);
-                float x = Random.Range(containerMin.x + elementSize.x / 2f - transformedCenterOffset.x, containerMax.x - elementSize.x / 2f - transformedCenterOffset.x);
-                float y = Random.Range(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y, containerMax.y - elementSize.y / 2f - transformedCenterOffset.y);
-                float z = Random.Range(containerMin.z + elementSize.z / 2f - transformedCenterOffset.z, containerMax.z - elementSize.z / 2f - transformedCenterOffset.z);
-                if (-(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y) + (containerMax.y - elementSize.y / 2f - transformedCenterOffset.y) < 0)
-                    y = containerMin.y + elementSize.y / 2f - transformedCenterOffset.y;
-                robot.transform.position = new Vector3(x, 1, z);
-                float direction = startZone.GetComponent<StartZoneController>().angle;
-                float fov = startZone.GetComponent<StartZoneController>().fov;
-                robot.transform.rotation = Quaternion.Euler(0, Random.Range(direction - fov/2, direction + fov/2), 0);
-            }
+            PlaceRobotInStartZone();
         }
 
         List<string> selectedRandomObjectsNames = Settings.config.simulationOptions.selectedRandomObjects;
@@ -128,9 +105,43 @@ public class SimulationController : MonoBehaviour
 
         StartCoroutine(StartCapture());
 
-        wapiThread = new Thread(WAPIRecv);
-        wapiThread.IsBackground = true;
+        wapiThread = new Thread(WAPIRecv) { IsBackground = true };
         wapiThread.Start();
+    }
+
+    public void PlaceRobotInStartZone()
+    {
+        var startZones = GameObject.FindGameObjectsWithTag("StartZone");
+        if (startZones.Length > 0)
+        {
+            System.Random r = new System.Random();
+            int i = r.Next(0, startZones.Length);
+            var startZone = startZones[i];
+
+            DatasetObjectInfo elementInfo = robot.GetComponent<DatasetObjectInfo>();
+            var elementSize = elementInfo.GetBoundarySize();
+            var bounds = startZone.GetComponent<Collider>().bounds;
+
+            var containerMin = bounds.min;
+            var containerMax = bounds.max;
+
+            Vector3 transformedCenterOffset = robot.transform.TransformDirection(elementInfo.center);
+            float x = Random.Range(containerMin.x + elementSize.x / 2f - transformedCenterOffset.x, containerMax.x - elementSize.x / 2f - transformedCenterOffset.x);
+            float y = Random.Range(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y, containerMax.y - elementSize.y / 2f - transformedCenterOffset.y);
+            float z = Random.Range(containerMin.z + elementSize.z / 2f - transformedCenterOffset.z, containerMax.z - elementSize.z / 2f - transformedCenterOffset.z);
+            if (-(containerMin.y + elementSize.y / 2f - transformedCenterOffset.y) + (containerMax.y - elementSize.y / 2f - transformedCenterOffset.y) < 0)
+                y = containerMin.y + elementSize.y / 2f - transformedCenterOffset.y;
+            robot.transform.position = new Vector3(x, 1, z);
+            float direction = startZone.GetComponent<StartZoneController>().angle;
+            float fov = startZone.GetComponent<StartZoneController>().fov;
+            robot.transform.rotation = Quaternion.Euler(0, Random.Range(direction - fov / 2, direction + fov / 2), 0);
+        }
+
+        foreach(var cp in GameObject.FindGameObjectsWithTag("Checkpoint"))
+            cp.GetComponent<CheckpointController>().reached = false;
+
+        robotController.rb.velocity = Vector3.zero;
+        robotController.rb.angularVelocity = Vector3.zero;
     }
 
     IEnumerator StartCapture()
@@ -279,14 +290,22 @@ public class SimulationController : MonoBehaviour
         while (acceptNewClients)
         {
             TcpClient client = wapiSocket.AcceptTcpClient();
-            
+
             WAPIClient wapiClient = new WAPIClient(client, this);
-            lock (jsonDictionaryLock) {
-                wapiClients.Add(wapiClient.id, wapiClient);
-                Debug.Log("Json client connected, connected: " + WAPIClient.connectedClients.ToString());
-            }
+
+            if (wapiClients.TryAdd(wapiClient.id, wapiClient)) Debug.Log("Json client connected, connected: " + WAPIClient.connectedClients.ToString());
+            else Debug.LogError("Failed to add a client to wapiCLient dict");
         }
         Debug.Log("acceptNewClients = false");
+    }
+
+    public void SendToClients(PacketType packetType, Flag packetFlag, string json)
+    {
+        foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag, json);
+    }
+    public void SendToClients(PacketType packetType, Flag packetFlag, byte[] bytes)
+    {
+        foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag, bytes);
     }
 
     void OnApplicationQuit()

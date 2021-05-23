@@ -9,6 +9,7 @@ TagManager:
   - Checkpoint
   - NoGoZone
   - FinishZone
+  - SimulationController
   layers:
   - Default
   - TransparentFX

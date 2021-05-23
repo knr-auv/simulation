@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class FinishZoneController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    public string id;
+    
+    void OnTriggerEnter(Collider collider)//TODO check if its AUV
     {
-        
+        Debug.Log("finished in " + id + " FinishZone");
+        GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().PlaceRobotInStartZone();
+        GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().SendToClients(WAPIClient.PacketType.HIT_FZ, WAPIClient.Flag.None, "{\"id\":\"" + id + "\"}");
     }
-
-    // Update is called once per frame
-    void Update()
+    public void OnDrawGizmosSelected()
     {
-        
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireCube(GetComponent<Collider>().bounds.center, GetComponent<Collider>().bounds.size);
     }
 }
