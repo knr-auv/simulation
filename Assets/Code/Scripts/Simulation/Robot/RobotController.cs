@@ -128,8 +128,8 @@ public class Motor : Module
         if (fill == 0f || rc.transform.TransformPoint(position).y > 0) return;
         float force = Force();
         rc.rb.AddForceAtPosition(rc.transform.TransformDirection(rotation * Vector3.forward * force), rc.transform.TransformPoint(position), ForceMode.Force);
-        Vector3 torque = new Vector3(0, 0, 2f * force * radius * (isClockwise ? 1f : -1f));
-        rc.rb.AddRelativeTorque(rotation * torque, ForceMode.Force);
+      //  Vector3 torque = new Vector3(0, 0, 2f * force * radius * (isClockwise ? 1f : -1f));
+       // rc.rb.AddRelativeTorque(rotation * torque, ForceMode.Force); //TODO momentum
     }
 
     override public void DrawGizmos()
