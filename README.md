@@ -10,11 +10,8 @@ Okoń AUV simulation 2.0 built in [Unity](https://unity.com/) 2020.1.3f1. Simula
 	
 ## Table of contents
 
-- [Usage](#usage)
-	- [Startup](#startup)
-	- [Settings](#settings-file)
-	- [Important notes](#important-notes)
-- [Networking](#networking)
+- [Usage](https://github.com/knr-auv/simulation/wiki/Usage)
+- [Networking](https://github.com/knr-auv/simulation/wiki/Networking)
 - [Simulation](#simulation)
 	- [Physics](#physics)
 		- [Thrusters](#thruster)
