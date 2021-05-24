@@ -8,7 +8,7 @@ public class Detector
 
     public List<VisibilityInfo> Detect(Camera camera)
     {
-        detection = new List<VisibilityInfo>();
+        detection = new List<VisibilityInfo>(); //TODO List pool?
         var objectsInSceneArray = GameObject.FindGameObjectsWithTag("ToDetect");
         for (int i = 0; i < objectsInSceneArray.Length; i++)
             detection.Add(objectsInSceneArray[i].GetComponent<DatasetObjectInfo>().CheckVisibility(camera));

@@ -6,27 +6,19 @@ public class DatasetObjectInfo : MonoBehaviour
 {
     [Header("Boundaries settings")]
     [SerializeField]
-    public bool isWaterContainer;
+    public bool isWaterContainer, isCamera, includeInDataset;
     [SerializeField]
-    public bool isCamera;
-    [SerializeField]
-    public bool includeInDataset;
-    [SerializeField]
-    public Vector3 center = Vector3.zero;
-    [SerializeField]
-    public Vector3 size = new Vector3(1,1,1);
-    //[ReadOnly]
+    public Vector3 center = Vector3.zero, size = new Vector3(1,1,1);
+  
     public Vector3 BoundarySize;
     [SerializeField]
-    public string className;
-    [SerializeField]
-    public string typeName;
+    public string className, typeName;
     [SerializeField]
     public int testPointsNum = 1000;
 
     public List<Vector3> testPoints;
     public List<bool> visiblePoints;
-    private Rigidbody rb = new Rigidbody();
+   // private Rigidbody rb = new Rigidbody(); TODO
 
     public void GenerateTestPointsNonUniform(int n)
     {
@@ -458,7 +450,7 @@ public class DatasetObjectInfo : MonoBehaviour
     }
 }
 
-public class VisibilityInfo
+public struct VisibilityInfo
 {
     public bool visible;
     public bool visibleInFrame;

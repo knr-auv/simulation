@@ -128,7 +128,6 @@ public class SimulationOptions
     public int webAPIPort { get; set; }
     public int videoQuality { get; set; }
     public string selectedWaterContainer { get; set; }
-    public string selectedRobot { get; set; }
     public List<string> selectedRandomObjects { get; set; }
     public float fixedDeltaTime { get; set; }
     public int depthMapQuality { get; set; }

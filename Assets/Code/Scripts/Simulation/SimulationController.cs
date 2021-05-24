@@ -29,8 +29,12 @@ public class SimulationController : MonoBehaviour
     [SerializeField]
     public List<GameObject> knownObjects;
 
+    [SerializeField]
+    public GameObject robotPrefab;
+
     GameObject waterContainer;
     GameObject robot;
+    
     public RobotController robotController;
 
     //WAPI
@@ -48,24 +52,21 @@ public class SimulationController : MonoBehaviour
     {
         QualitySettings.vSyncCount = 0;  // VSync must be disabled
         Application.targetFrameRate = 35;
+        
 
         mainThreadUpdateWorkers = new ConcurrentQueue<MainThreadUpdateWorker>();
         if (Settings.config == null || Settings.config.mode == null)
         {
             SceneManager.LoadScene("Start");
             return;//TODO take config
-        }/**/
+        }
 
         string selectedWaterContainer = Settings.config.simulationOptions.selectedWaterContainer;
         if (TryGetObjectByTypeName(selectedWaterContainer, out GameObject waterContainerPrefab)) waterContainer = Instantiate(waterContainerPrefab, Vector3.zero, Quaternion.identity);
 
-        string selectedRobotName = Settings.config.simulationOptions.selectedRobot;
-        if (TryGetObjectByTypeName(selectedRobotName, out GameObject robotPrefab))
-        {
-            robot = Instantiate(robotPrefab, new Vector3(0, 2, 0), Quaternion.identity);
-            robotController = robot.GetComponent<RobotController>();
-            PlaceRobotInStartZone();
-        }
+        robot = Instantiate(robotPrefab, new Vector3(0, 2, 0), Quaternion.identity);
+        robotController = robot.GetComponent<RobotController>();
+        PlaceRobotInStartZone();
 
         List<string> selectedRandomObjectsNames = Settings.config.simulationOptions.selectedRandomObjects;
         foreach (string randomObjectName in selectedRandomObjectsNames)
@@ -81,9 +82,7 @@ public class SimulationController : MonoBehaviour
                 Debug.LogError(randomObjectName);
             }
         }
-
         Time.fixedDeltaTime = Settings.config.simulationOptions.fixedDeltaTime;
-
         /*
         camera = Camera.main;
         postDebug = cameraObject.GetComponent<PostProcessDebug>();
@@ -292,9 +291,7 @@ public class SimulationController : MonoBehaviour
         while (acceptNewClients)
         {
             TcpClient client = wapiSocket.AcceptTcpClient();
-
             WAPIClient wapiClient = new WAPIClient(client, this);
-
             if (wapiClients.TryAdd(wapiClient.id, wapiClient)) Debug.Log("Json client connected, connected: " + WAPIClient.connectedClients.ToString());
             else Debug.LogError("Failed to add a client to wapiCLient dict");
         }

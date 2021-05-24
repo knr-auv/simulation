@@ -57,7 +57,7 @@ public class WAPIClient
     }
 
     static int clientId = 0;
-    public static int connectedClients = 0;
+    public static volatile int connectedClients = 0;
     readonly TcpClient client;
     NetworkStream stream;
     public int id;
@@ -104,10 +104,13 @@ public class WAPIClient
                     byte[] dataLenBytes = new byte[4];
                     ReadAllFromStream(stream, dataLenBytes, 4);
                     int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
+                    System.Diagnostics.Stopwatch st = new System.Diagnostics.Stopwatch();
+                    st.Start();
                     byte[] dataFromClient = new byte[dataLength];
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
-
+                    st.Stop();
+                    Debug.Log(st.ElapsedMilliseconds);
                     switch (packetType)
                     {
                         case PacketType.RST_SIM:
@@ -179,34 +182,31 @@ public class WAPIClient
                             EnqueuePacket(PacketType.ACK, packetFlag | Flag.TEST, "{\"info\":\"ack ack\"}");
                             break;
                         case PacketType.GET_DEPTH:
-                            byte[] map = new byte[1];
                             MainThreadUpdateWorker depthWorker = new MainThreadUpdateWorker()
                             {
-                                action = () => { 
-                                    map = simulationControllerInstance.GetDepthMap();
+                                action = () => {
+                                    byte[] map = simulationControllerInstance.GetDepthMap();
                                     EnqueuePacket(PacketType.GET_DEPTH, packetFlag, "{\"depth\":\"" + System.Convert.ToBase64String(map) + "\"}");
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
                             break;
                         case PacketType.GET_DEPTH_BYTES:
-                            map = new byte[1];
                             depthWorker = new MainThreadUpdateWorker()
                             {
-                                action = () => { 
-                                    map = simulationControllerInstance.GetDepthMap();
+                                action = () => {
+                                    byte[] map = simulationControllerInstance.GetDepthMap();
                                     EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map);
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
                             break;
                         case PacketType.GET_VIDEO_BYTES:
-                            map = new byte[1];
                             depthWorker = new MainThreadUpdateWorker()
                             {
                                 action = () =>
                                 {
-                                    map = simulationControllerInstance.GetVideo();
+                                    byte[] map = simulationControllerInstance.GetVideo();
                                     /*  UnityEngine.Rendering.AsyncGPUReadback.Request(new ComputeBuffer(1,1), (req) =>
                                       {
                                           int w = 1280, h = 720;
@@ -230,9 +230,9 @@ public class WAPIClient
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
                             break;
                         case (PacketType)0xFF:
+                            Debug.Log("got illegal 0xFF packet type");
                             clientConnected = false;
                             break;
-                        
                         default:
                             Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packetType }));
                             SendJson(PacketType.ACK, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'" + jsonFromClient + "'}");
