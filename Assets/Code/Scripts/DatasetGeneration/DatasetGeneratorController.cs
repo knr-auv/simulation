@@ -10,26 +10,17 @@ using UnityStandardAssets.Water;
 
 public class DatasetGeneratorController : MonoBehaviour
 {
-    [SerializeField] GameObject cameraObject;
+    [SerializeField]
+    public GameObject cameraObject;
 
     [Header("Known objects")]
-    [SerializeField] GameObject flareRed1;
-    [SerializeField] GameObject flareRed2;
-    [SerializeField] GameObject gate1;
-    [SerializeField] GameObject gate2;
-    [SerializeField] GameObject gate3;
-    [SerializeField] GameObject gate4;//TODO add list like in sim
-    [SerializeField] GameObject waterpool1;
-    [SerializeField] GameObject obstacle1;
-    [SerializeField] GameObject tripod1;
-    [SerializeField] GameObject diver1;
-    [SerializeField] GameObject flareYellow1;
+    [SerializeField]//TODO add list like in sim
+    public GameObject flareRed1, flareRed2, gate1, gate2, gate3, gate4, waterpool1, obstacle1, tripod1, diver1, flareYellow1;
 
     [Header("Lights")]
-    [SerializeField] Light light1;
-    [SerializeField] Light light2;
+    [SerializeField]
+    public Light light1, light2;
 
-    
     PostProcessDebug postDebug;
     PostProcessLayer postLayer;
     PostProcessVolume postVolume;
@@ -240,11 +231,11 @@ public class DatasetGeneratorController : MonoBehaviour
                 {
                     ClearSceneFromObjects();
                    // if (Settings.config.datasetOptions.objectMultipleFrameNum == 0)
-                    if (1 == 0)
+                 /*   if (1 == 0)
                     {
                         generationState = GenerationState.NoObjectsSetup;
-                        return;
-                    }
+                        return; TODO
+                    }*/
                     Debug.Log("Cleared scene for M.O.");
                     randomObjectsInScene = new List<GameObject>();
                     int TODOrandomObjectsNum = 20;

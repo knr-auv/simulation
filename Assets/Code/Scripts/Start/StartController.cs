@@ -12,9 +12,9 @@ using YamlDotNet.Serialization.NamingConventions;
 public class StartController : MonoBehaviour
 {
     [SerializeField]
-    Text console;
-    private int counter = 100;
+    public Text console;
 
+    private int counter = 100;
     private bool configCorrect;
     
     void Start()

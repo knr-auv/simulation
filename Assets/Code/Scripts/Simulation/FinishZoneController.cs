@@ -7,8 +7,9 @@ public class FinishZoneController : MonoBehaviour
     [SerializeField]
     public string id;
     
-    void OnTriggerEnter(Collider collider)//TODO check if its AUV
+    void OnTriggerEnter(Collider collider)
     {
+        if (collider.tag != "Robot") return;
         Debug.Log("finished in " + id + " FinishZone");
         GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().PlaceRobotInStartZone();
         GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().SendToClients(WAPIClient.PacketType.HIT_FZ, WAPIClient.Flag.None, "{\"id\":\"" + id + "\"}");

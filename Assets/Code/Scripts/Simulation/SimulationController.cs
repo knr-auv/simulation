@@ -13,8 +13,9 @@ using static WAPIClient;
 
 public class SimulationController : MonoBehaviour
 {
-    [SerializeField] GameObject cameraObject;
-    Camera camera;
+    /*[SerializeField] 
+    GameObject cameraObject;
+    Camera camera;*/
 
     [Header("Post processing")]
     PostProcessDebug postDebug;
@@ -22,10 +23,11 @@ public class SimulationController : MonoBehaviour
     PostProcessVolume postVolume;
 
     [Header("Lights")]
-    [SerializeField] Light light1;
-    [SerializeField] Light light2;
+    [SerializeField]
+    Light light1, light2;
 
-    [SerializeField] List<GameObject> knownObjects;
+    [SerializeField]
+    public List<GameObject> knownObjects;
 
     GameObject waterContainer;
     GameObject robot;

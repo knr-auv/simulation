@@ -13,8 +13,9 @@ public class CheckpointController : MonoBehaviour
 
     void Start() => reached = false;
 
-    void OnTriggerEnter(Collider collider)//TODO check if its AUV
+    void OnTriggerEnter(Collider collider)
     {
+        if (collider.tag != "Robot") return;
         if (reached) return;
         reached = true;
         Debug.Log("checkpoint " + id + " reached");

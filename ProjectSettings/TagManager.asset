@@ -10,6 +10,7 @@ TagManager:
   - NoGoZone
   - FinishZone
   - SimulationController
+  - Robot
   layers:
   - Default
   - TransparentFX

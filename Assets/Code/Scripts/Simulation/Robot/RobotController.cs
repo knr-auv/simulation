@@ -110,7 +110,6 @@ public class Motor : Module
     public float radius = 0.05f;
     public bool isClockwise = false;
 
-    readonly float a = 1.66352902e-8f, b = -0.00003994119f, c = 0.00752234546f, d = 22.4126993334f;
     float Force()
     {
         if (rc.transform.TransformPoint(position).y >= 0) return 0f;
