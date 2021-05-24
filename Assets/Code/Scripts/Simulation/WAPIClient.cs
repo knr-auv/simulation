@@ -104,13 +104,10 @@ public class WAPIClient
                     byte[] dataLenBytes = new byte[4];
                     ReadAllFromStream(stream, dataLenBytes, 4);
                     int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
-                    System.Diagnostics.Stopwatch st = new System.Diagnostics.Stopwatch();
-                    st.Start();
                     byte[] dataFromClient = new byte[dataLength];
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
-                    st.Stop();
-                    Debug.Log(st.ElapsedMilliseconds);
+                   
                     switch (packetType)
                     {
                         case PacketType.RST_SIM:
