@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -7,6 +8,7 @@ using System.Threading;
 using UnityEngine;
 using Utf8Json;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 public class WAPIClient
 {
@@ -47,12 +49,16 @@ public class WAPIClient
         public PacketType packetType;
         public Flag flag;
         public byte[] bytes;
+        public int length;
+        public bool rented;
 
-        public Packet(PacketType packetType, Flag flag, byte[] bytes)
+        public Packet(PacketType packetType, Flag flag, byte[] bytes, int length, bool rented)
         {
             this.packetType = packetType;
             this.flag = flag;
             this.bytes = bytes;
+            this.length = length;
+            this.rented = rented;
         }
     }
 
@@ -65,7 +71,7 @@ public class WAPIClient
     readonly SimulationController simulationControllerInstance;
     bool clientConnected;
     readonly StringBuilder sb = new StringBuilder();
-    private ConcurrentQueue<Packet> toSend;
+    private readonly ConcurrentQueue<Packet> toSend;
 
     public WAPIClient(TcpClient client, SimulationController simulationControllerInstance)
     {
@@ -84,12 +90,12 @@ public class WAPIClient
         talking.Start();
     }
 
-    void HandleJsonClient()
+    private void HandleJsonClient()
     {
         stream = client.GetStream();
         stream.ReadTimeout = 1000 * 60 * 5;//TODO
-        PacketType packetType;
         Flag packetFlag;
+        byte[] dataLenBytes = new byte[4];
         string jsonFromClient = "";
         RobotController rc = simulationControllerInstance.robotController;
         try
@@ -99,12 +105,11 @@ public class WAPIClient
                 if (stream.DataAvailable)
                 {
                     #region JSON_recv
-                    packetType = (PacketType)ReadByteFromStream(stream);
+                    var packetType = (PacketType)ReadByteFromStream(stream);
                     packetFlag = (Flag)ReadByteFromStream(stream);
-                    byte[] dataLenBytes = new byte[4];
                     ReadAllFromStream(stream, dataLenBytes, 4);
                     int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
-                    byte[] dataFromClient = new byte[dataLength];
+                    byte[] dataFromClient = ArrayPool<byte>.Shared.Rent(dataLength);
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
                    
@@ -124,7 +129,6 @@ public class WAPIClient
                                 action = () => {
                                     foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))
                                         ret += "{\"id\":\"" + obj.GetComponent<CheckpointController>().id + "\",reached:" + obj.GetComponent<CheckpointController>().reached + "}";
-
                                     EnqueuePacket(PacketType.GET_CPS, packetFlag, ret + "]");
                                 }
                             };
@@ -158,11 +162,6 @@ public class WAPIClient
                             ping.ping = ping.timestamp - clientTimestamp;
                             EnqueuePacket(PacketType.PING, packetFlag, JsonSerializer.ToJsonString(ping));
                             break;
-                        /*case Packet.SET_SIM:
-                            Settings settings = new Settings();
-                            TryJsonToObjectState(jsonFromClient, settings);
-                            quality = settings.quality;
-                            break;*/
                         case PacketType.GET_DETE:
                             JSON.Detection detection = new JSON.Detection();
                             MainThreadUpdateWorker detectionWorker = new MainThreadUpdateWorker()
@@ -193,7 +192,7 @@ public class WAPIClient
                             {
                                 action = () => {
                                     byte[] map = simulationControllerInstance.GetDepthMap();
-                                    EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map);
+                                    EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map, map.Length, false);
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
@@ -221,7 +220,7 @@ public class WAPIClient
 
                                           map = ImageConversion.EncodeToPNG(newTex);
                                       });*/
-                                    EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map);
+                                    EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map, map.Length, false);
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
@@ -237,6 +236,7 @@ public class WAPIClient
                     }
 
                     if (packetFlag.HasFlag(Flag.SERVER_ECHO)) EnqueuePacket(PacketType.ACK, Flag.None, "{'fromClient':'" + jsonFromClient + "'}");
+                    ArrayPool<byte>.Shared.Return(dataFromClient);
                     #endregion
                 }
                 
@@ -255,8 +255,14 @@ public class WAPIClient
         connectedClients--;
     }
 
-    public void EnqueuePacket(PacketType packetType, Flag packetFlag, string json) => toSend.Enqueue(new Packet(packetType, packetFlag, Encoding.ASCII.GetBytes(json)));
-    public void EnqueuePacket(PacketType packetType, Flag packetFlag, byte[] bytes) => toSend.Enqueue(new Packet(packetType, packetFlag, bytes));
+    public void EnqueuePacket(PacketType packetType, Flag packetFlag, string json)
+    {
+        byte[] bytes = ArrayPool<byte>.Shared.Rent(Encoding.ASCII.GetMaxByteCount(json.Length));
+        int len = Encoding.ASCII.GetBytes(json, 0, json.Length, bytes, 0);
+        toSend.Enqueue(new Packet(packetType, packetFlag, bytes, len, true));
+    }
+
+    public void EnqueuePacket(PacketType packetType, Flag packetFlag, byte[] bytes, int len, bool rented) => toSend.Enqueue(new Packet(packetType, packetFlag, bytes, len, rented));
     
     void Send(PacketType packetType, Flag packetFlag, string json)
     {
@@ -304,11 +310,11 @@ public class WAPIClient
         talking.Abort();
     }
 
-    public void ReadAllFromStream(NetworkStream stream, byte[] buffer, int len)
+    private void ReadAllFromStream(NetworkStream stream, byte[] buffer, int len)
     {
         int current = 0;
-        while (current < buffer.Length)
-            current += stream.Read(buffer, current, len - current > buffer.Length ? buffer.Length : len - current);
+        while (current < len)
+            current += stream.Read(buffer, current, len - current > len ? len : len - current);
     }
 
     private static byte ReadByteFromStream(NetworkStream stream)

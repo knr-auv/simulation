@@ -2,8 +2,9 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
-    <CscToolPath>C:\Program Files\Unity\Hub\Editor\2020.1.3f1\Editor\Data\Tools\RoslynScripts</CscToolPath>
-    <CscToolExe>unity_csc.bat</CscToolExe>
+    <_TargetFrameworkDirectories>non_empty_path_generated_by_unity.rider.package</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>non_empty_path_generated_by_unity.rider.package</_FullFrameworkReferenceAssemblyPaths>
+    <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,7 +12,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{5BEE10C4-149B-25A3-D7FE-2D73FC7CC1DC}</ProjectGuid>
+    <ProjectGuid>{c410ee5b-9b14-a325-d7fe-2d73fc7cc1dc}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -29,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
     <NoWarn>0169</NoWarn>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,6 +40,7 @@
     <WarningLevel>4</WarningLevel>
     <NoWarn>0169</NoWarn>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <NoConfig>true</NoConfig>
@@ -46,14 +49,6 @@
     <ImplicitlyExpandNETStandardFacades>false</ImplicitlyExpandNETStandardFacades>
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="UnityEngine">
-      <HintPath>C:\Program Files\Unity\Hub\Editor\2020.1.3f1\Editor\Data\Managed/UnityEngine/UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor">
-      <HintPath>C:\Program Files\Unity\Hub\Editor\2020.1.3f1\Editor\Data\Managed/UnityEditor.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Design\Scenes\SampleScenes\Scripts\LevelReset.cs" />
      <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
@@ -84,8 +79,8 @@
      <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetObjectInfo.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\JSON.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\Robot\RobotController.cs" />
+     <None Include="Assets\Packages\System.Buffers.4.5.1\lib\net461\System.Buffers.xml" />
      <None Include="Assets\Packages\Microsoft.NETCore.Platforms.1.1.0\dotnet_library_license.txt" />
-     <None Include="Assets\Packages\YamlDotNet.8.1.2\LICENSE.txt" />
      <None Include="Assets\Packages\System.Text.Encoding.4.3.0\ThirdPartyNotices.txt" />
      <None Include="Assets\Packages\System.Runtime.4.3.0\dotnet_library_license.txt" />
      <None Include="Assets\Packages\Microsoft.NETCore.Targets.1.1.0\ThirdPartyNotices.txt" />
@@ -96,6 +91,7 @@
      <None Include="Assets\Packages\System.IO.4.3.0\ThirdPartyNotices.txt" />
      <None Include="Assets\Graphics\RenderDepth.shader" />
      <None Include="Assets\Packages\System.Threading.Tasks.Extensions.4.4.0\version.txt" />
+     <None Include="Assets\Packages\YamlDotNet.11.1.1\lib\net45\YamlDotNet.xml" />
      <None Include="Assets\Packages\Microsoft.NETCore.Targets.1.1.0\dotnet_library_license.txt" />
      <None Include="Assets\Packages\System.Threading.Tasks.4.3.0\ThirdPartyNotices.txt" />
      <None Include="Assets\Packages\System.Threading.Tasks.4.3.0\dotnet_library_license.txt" />
@@ -103,9 +99,11 @@
      <None Include="Assets\Packages\System.Threading.Tasks.Extensions.4.4.0\lib\netstandard2.0\System.Threading.Tasks.Extensions.xml" />
      <None Include="Assets\Packages\System.ValueTuple.4.4.0\useSharedDesignerContext.txt" />
      <None Include="Assets\Packages\System.IO.4.3.0\dotnet_library_license.txt" />
+     <None Include="Assets\Packages\System.Buffers.4.5.1\useSharedDesignerContext.txt" />
      <None Include="Assets\Packages\System.ValueTuple.4.4.0\version.txt" />
-     <None Include="Assets\Packages\YamlDotNet.8.1.2\lib\netstandard1.3\YamlDotNet.xml" />
      <None Include="Assets\Packages\System.Text.Encoding.4.3.0\dotnet_library_license.txt" />
+     <None Include="Assets\Packages\YamlDotNet.11.1.1\LICENSE.txt" />
+     <None Include="Assets\Packages\System.Buffers.4.5.1\version.txt" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>
@@ -138,6 +136,9 @@
  </Reference>
  <Reference Include="UnityEditor.UI">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine">
+ <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -322,14 +323,20 @@
  <Reference Include="UnityEngine.XRModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEngine/UnityEngine.XRModule.dll</HintPath>
  </Reference>
+ <Reference Include="UnityEditor">
+ <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
+ </Reference>
  <Reference Include="System.Threading.Tasks.Extensions">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/System.Threading.Tasks.Extensions.4.4.0/lib/netstandard2.0/System.Threading.Tasks.Extensions.dll</HintPath>
  </Reference>
  <Reference Include="Utf8Json">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/Utf8Json.1.3.7/lib/netstandard2.0/Utf8Json.dll</HintPath>
  </Reference>
+ <Reference Include="System.Buffers">
+ <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/System.Buffers.4.5.1/lib/net461/System.Buffers.dll</HintPath>
+ </Reference>
  <Reference Include="YamlDotNet">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/YamlDotNet.8.1.2/lib/netstandard1.3/YamlDotNet.dll</HintPath>
+ <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/YamlDotNet.11.1.1/lib/net45/YamlDotNet.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>
@@ -679,7 +686,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{C98FA2B5-11A9-74F6-8BDE-51B0C2FDE242}</Project>
+      <Project>{1a8630a0-a34d-255c-6564-aebdf61363d3}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
   </ItemGroup>

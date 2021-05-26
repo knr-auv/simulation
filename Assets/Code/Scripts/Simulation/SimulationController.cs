@@ -6,7 +6,10 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using static WAPIClient;
@@ -148,37 +151,48 @@ public class SimulationController : MonoBehaviour
     IEnumerator StartCapture()
     {
         yield return new WaitForSeconds(2);
-        if (robotController.depthCamera.targetTexture.width != (int)Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale))
+        if (robotController.depthCamera.targetTexture.width !=
+            (int) Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale))
         {
             if (robotController.depthCamera.targetTexture != null) robotController.depthCamera.activeTexture.Release();
-            robotController.depthCamera.targetTexture = new RenderTexture((int)Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale), (int)Mathf.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
+            robotController.depthCamera.targetTexture = new RenderTexture(
+                (int) Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale),
+                (int) Mathf.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
         }
 
-        if (robotController.colorCamera.targetTexture.width != (int)Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
+        if (robotController.colorCamera.targetTexture.width !=
+            (int) Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
         {
             if (robotController.colorCamera.targetTexture != null) robotController.colorCamera.activeTexture.Release();
-            robotController.colorCamera.targetTexture = new RenderTexture((int)Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale), (int)Mathf.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
+            robotController.colorCamera.targetTexture = new RenderTexture(
+                (int) Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale),
+                (int) Mathf.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
         }
 
+        yield return new WaitUntil(() =>
+            robotController.depthCamera.activeTexture != null && robotController.depthCamera.activeTexture != null);
+
+        Texture2D texColor, texDepth;
+        AsyncGPUReadbackRequest requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
+        AsyncGPUReadbackRequest requestDepth = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.depthCamera.activeTexture);
+        yield return new WaitUntil(() => requestColor.done && requestDepth.done);
+        texColor = new Texture2D(requestColor.width, requestColor.height, TextureFormat.RGBA32, false);
+        texDepth = new Texture2D(requestDepth.width, requestDepth.height, TextureFormat.RGBA32, false);
+         
         while (true)
         {
-            yield return new WaitUntil(() => robotController.depthCamera.activeTexture != null && robotController.depthCamera.activeTexture != null);
-            var requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
-            var requestDepth = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.depthCamera.activeTexture);
+            requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
+            requestDepth = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.depthCamera.activeTexture);
             yield return new WaitUntil(() => requestColor.done && requestDepth.done);
             if (!requestColor.hasError)
             {
-                Texture2D tex = new Texture2D(requestColor.width, requestColor.height, TextureFormat.RGBA32, false); ;
-                tex.LoadRawTextureData(requestColor.GetData<byte>());
-                colorBytes = tex.EncodeToJPG(Settings.config.simulationOptions.videoFeedQuality);
-                Destroy(tex);
+                texColor.LoadRawTextureData(requestColor.GetData<byte>()); //TODO mayby EncodeNativeArrayToJPG
+                colorBytes = texColor.EncodeToJPG(Settings.config.simulationOptions.videoFeedQuality);
             }
             if (!requestDepth.hasError)
             {
-                Texture2D tex = new Texture2D(requestDepth.width, requestDepth.height, TextureFormat.RGBA32, false); ;
-                tex.LoadRawTextureData(requestDepth.GetData<byte>());
-                depthBytes = tex.EncodeToJPG(Settings.config.simulationOptions.depthMapQuality);
-                Destroy(tex);
+                texDepth.LoadRawTextureData(requestDepth.GetData<byte>());
+                depthBytes = texDepth.EncodeToJPG(Settings.config.simulationOptions.depthMapQuality);
             }
         }
     }
@@ -236,6 +250,7 @@ public class SimulationController : MonoBehaviour
          RenderTexture.active = robotController.colorCamera.activeTexture;
          tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
          RenderTexture.active = null;
+         
          if (Settings.config.simulationOptions.videoFeedQuality >= 100) ret = tex.EncodeToPNG();
          else ret = tex.EncodeToJPG(Settings.config.simulationOptions.videoFeedQuality);
          Destroy(tex);
@@ -304,7 +319,7 @@ public class SimulationController : MonoBehaviour
     }
     public void SendToClients(PacketType packetType, Flag packetFlag, byte[] bytes)
     {
-        foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag, bytes);
+        foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag, bytes, bytes.Length, false);
     }
 
     void OnApplicationQuit()

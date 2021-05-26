@@ -166,7 +166,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0f46a07dab71104d9ea2bab93898795, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraObject: {fileID: 0}
   light1: {fileID: 437292843}
   light2: {fileID: 0}
   knownObjects:
@@ -185,6 +184,7 @@ MonoBehaviour:
   - {fileID: 2677716390902683653, guid: f725f18564a1d964dbde6305379556ca, type: 3}
   - {fileID: 5455729281327230713, guid: c6bcc9e75139fff4bbcac193d5258b81, type: 3}
   - {fileID: 8822704632882775983, guid: 2b447fa14ecbf4643851ba8d988bc242, type: 3}
+  robotPrefab: {fileID: 3346525046335329387, guid: 51a85fe07c6400945aa11b56961668c6, type: 3}
   robotController: {fileID: 0}
   depthMapBytes: 
   getDepthImage: 0
