@@ -98,6 +98,7 @@ public class WAPIClient
         Flag packetFlag;
         byte[] dataLenBytes = new byte[4];
         string jsonFromClient = "";
+        StringBuilder sb = new StringBuilder();
         RobotController rc = simulationControllerInstance.robotController;
         try
         {
@@ -119,10 +120,10 @@ public class WAPIClient
                         case PacketType.CHK_AP:
                             var j = Utf8Json.JsonSerializer.Deserialize<dynamic>(jsonFromClient);
                             string id = j["id"]; //TODO get id from JSON
-                            Debug.Log("id:" + id);
                             var actionpointWorker = new MainThreadUpdateWorker()
                             {
-                                action = () => {
+                                action = () =>
+                                {
                                     if (id.Length != 0)
                                     {
                                         bool ret = false;
@@ -131,18 +132,22 @@ public class WAPIClient
                                             ActionpointController apc = obj.GetComponent<ActionpointController>();
                                             if (apc.id.Equals(id, StringComparison.Ordinal)) ret = apc.active;
                                         }
-                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, "{\"active\":" + ret.ToString() + "}");
+                                        if(ret)EnqueuePacket(PacketType.CHK_AP, Flag.None, "{\"active\":true}");
+                                        else EnqueuePacket(PacketType.CHK_AP, Flag.None, "{\"active\":false}");
                                     }
                                     else
                                     {
-                                        string r = "[";
+                                        sb.Clear();
+                                        sb.Append('[');
                                         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Actionpoint"))
                                         {
                                             ActionpointController apc = obj.GetComponent<ActionpointController>();
-                                            r += "{\"id\":\"" + apc.id + "},";
+                                            sb.Append("{\"id\":\"");
+                                            sb.Append(apc.id);
+                                            sb.Append("},");
                                         }
-                                        r += "]";
-                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, r);
+                                        if (sb[sb.Length - 1] == ',') sb[sb.Length - 1] = ']';
+                                        EnqueuePacket(PacketType.CHK_AP, Flag.None, sb.ToString());
                                     }
                                 }
                             };
@@ -264,7 +269,7 @@ public class WAPIClient
                             break;
                         default:
                             Debug.LogWarning("Unknown dataframe type " + System.BitConverter.ToString(new byte[] { (byte)packetType }));
-                            SendJson(PacketType.ACK, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'" + jsonFromClient + "'}");
+                            EnqueuePacket(PacketType.ACK, Flag.None, "{'info':'Something went wrong. You shouldn't get this packet. Unknown dataframe packet!', 'fromClient':'" + jsonFromClient + "'}");
                             break;
                     }
 
@@ -273,7 +278,7 @@ public class WAPIClient
                     #endregion
                 }
                 
-                while (!toSend.IsEmpty) if (toSend.TryDequeue(out Packet packet)) Send(packet.packetType, packet.flag, packet.bytes);
+                while (!toSend.IsEmpty) if (toSend.TryDequeue(out Packet packet)) Send(packet.packetType, packet.flag, packet.bytes, packet.length);
             }
         }
         catch (Exception exp)
@@ -281,7 +286,7 @@ public class WAPIClient
             Debug.LogError("Json client exception\n" + jsonFromClient + "\n" + exp.Message + '\n' + exp.StackTrace);
             clientConnected = false;
         }
-
+        
         Debug.Log("Json client disconnected");
         stream?.Dispose();
         client?.Dispose();
@@ -297,44 +302,14 @@ public class WAPIClient
 
     public void EnqueuePacket(PacketType packetType, Flag packetFlag, byte[] bytes, int len, bool rented) => toSend.Enqueue(new Packet(packetType, packetFlag, bytes, len, rented));
     
-    void Send(PacketType packetType, Flag packetFlag, string json)
-    {
-        byte[] bytes = Encoding.ASCII.GetBytes(json);
-        stream.WriteByte((byte)packetType);
-        stream.WriteByte((byte)packetFlag);
-        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-        stream.Write(bytes, 0, bytes.Length);
-        if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
-            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
-    }
-
-    void Send(PacketType packetType, Flag packetFlag, byte[] bytes)
+    void Send(PacketType packetType, Flag packetFlag, byte[] bytes, int length)
     {
         stream.WriteByte((byte)packetType);
         stream.WriteByte((byte)packetFlag);
-        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-        stream.Write(bytes, 0, bytes.Length);
+        stream.Write(BitConverter.GetBytes(length), 0, 4);
+        stream.Write(bytes, 0, length);
         if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
-            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
-    }
-
-    void SendJson(PacketType packetType, string json)
-    {
-        byte[] bytes = Encoding.ASCII.GetBytes(json);
-        stream.WriteByte((byte)packetType);
-        stream.WriteByte((byte)0);
-        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-        stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
-    }
-
-    void SendBytes(PacketType packetType, byte[] bytes)
-    {
-        stream.WriteByte((byte)packetType);
-        stream.WriteByte((byte)0);
-        stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-        stream.Write(bytes, 0, bytes.Length);
-        Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + bytes.Length.ToString());
+            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + length.ToString());
     }
 
     public void Stop()
