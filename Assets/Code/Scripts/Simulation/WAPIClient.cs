@@ -28,6 +28,7 @@ public class WAPIClient
         GET_CPS = 0xC6,
         HIT_NGZ = 0xC7,
         HIT_FZ = 0xC8,
+        CHK_AP = 0xC9,
         REC_STRT = 0xD0,
         REC_ST = 0xD1,
         REC_RST = 0xD2,
@@ -115,6 +116,37 @@ public class WAPIClient
                    
                     switch (packetType)
                     {
+                        case PacketType.CHK_AP:
+                            var j = Utf8Json.JsonSerializer.Deserialize<dynamic>(jsonFromClient);
+                            string id = j["id"]; //TODO get id from JSON
+                            var actionpointWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => {
+                                    if (id.Length != 0)
+                                    {
+                                        bool ret = false;
+                                        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Actionpoint"))
+                                        {
+                                            ActionpointController apc = obj.GetComponent<ActionpointController>();
+                                            if (apc.id.Equals(id)) ret = apc.active;
+                                        }
+                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, "{" + ret.ToString() + "}");
+                                    }
+                                    else
+                                    {
+                                        string ret = "[";
+                                        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Actionpoint"))
+                                        {
+                                            ActionpointController apc = obj.GetComponent<ActionpointController>();
+                                            ret += "{\"id\":\"" + apc.id + "}";
+                                        }
+                                        ret += "]";
+                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, ret);
+                                    }
+                                }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(actionpointWorker);
+                            break;
                         case PacketType.RST_SIM:
                             MainThreadUpdateWorker resetWorker = new MainThreadUpdateWorker()
                             {
@@ -123,12 +155,12 @@ public class WAPIClient
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(resetWorker);
                             break;
                         case PacketType.GET_CPS:
-                            string ret = "[";
                             MainThreadUpdateWorker checkpointWorker = new MainThreadUpdateWorker()
                             {
                                 action = () => {
-                                    foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))
-                                        ret += "{\"id\":\"" + obj.GetComponent<CheckpointController>().id + "\",reached:" + obj.GetComponent<CheckpointController>().reached + "}";
+                                    string ret = "[";
+                                    foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))//TODO FIX BUG IN ARRAY
+                                        ret += "{\"id\":\"" + obj.GetComponent<CheckpointController>().id + "\",reached:" + obj.GetComponent<CheckpointController>().reached + "},";
                                     EnqueuePacket(PacketType.GET_CPS, packetFlag, ret + "]");
                                 }
                             };
