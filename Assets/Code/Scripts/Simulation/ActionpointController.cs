@@ -6,12 +6,12 @@ using UnityEngine;
 public class ActionpointController : MonoBehaviour
 {
     [SerializeField]
-    public string id = "AC";
+    public string id = "AP";
 
     [SerializeField]
     public bool active = false;
     
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
         if (other.tag != "Robot") return;
         active = true;

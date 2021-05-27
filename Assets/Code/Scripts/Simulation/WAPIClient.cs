@@ -119,6 +119,7 @@ public class WAPIClient
                         case PacketType.CHK_AP:
                             var j = Utf8Json.JsonSerializer.Deserialize<dynamic>(jsonFromClient);
                             string id = j["id"]; //TODO get id from JSON
+                            Debug.Log("id:" + id);
                             var actionpointWorker = new MainThreadUpdateWorker()
                             {
                                 action = () => {
@@ -128,20 +129,20 @@ public class WAPIClient
                                         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Actionpoint"))
                                         {
                                             ActionpointController apc = obj.GetComponent<ActionpointController>();
-                                            if (apc.id.Equals(id)) ret = apc.active;
+                                            if (apc.id.Equals(id, StringComparison.Ordinal)) ret = apc.active;
                                         }
-                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, "{" + ret.ToString() + "}");
+                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, "{\"active\":" + ret.ToString() + "}");
                                     }
                                     else
                                     {
-                                        string ret = "[";
+                                        string r = "[";
                                         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Actionpoint"))
                                         {
                                             ActionpointController apc = obj.GetComponent<ActionpointController>();
-                                            ret += "{\"id\":\"" + apc.id + "}";
+                                            r += "{\"id\":\"" + apc.id + "},";
                                         }
-                                        ret += "]";
-                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, ret);
+                                        r += "]";
+                                        EnqueuePacket(PacketType.CHK_AP, packetFlag, r);
                                     }
                                 }
                             };
