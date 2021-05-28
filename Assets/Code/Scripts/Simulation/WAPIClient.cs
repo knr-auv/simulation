@@ -94,8 +94,7 @@ public class WAPIClient
     private void HandleJsonClient()
     {
         stream = client.GetStream();
-        stream.ReadTimeout = 1000 * 60 * 5;//TODO
-        Flag packetFlag;
+        stream.ReadTimeout = 1000 * 60 * 5;//TODO change timeout?
         byte[] dataLenBytes = new byte[4];
         string jsonFromClient = "";
         StringBuilder sb = new StringBuilder();
@@ -108,18 +107,21 @@ public class WAPIClient
                 {
                     #region JSON_recv
                     var packetType = (PacketType)ReadByteFromStream(stream);
-                    packetFlag = (Flag)ReadByteFromStream(stream);
+                    var packetFlag = (Flag)ReadByteFromStream(stream);
                     ReadAllFromStream(stream, dataLenBytes, 4);
                     int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
                     byte[] dataFromClient = ArrayPool<byte>.Shared.Rent(dataLength);
                     ReadAllFromStream(stream, dataFromClient, dataLength);
                     jsonFromClient = Encoding.ASCII.GetString(dataFromClient, 0, dataLength);
-                   
+                    
+                    if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
+                        Debug.Log("Received " + Enum.GetName(typeof(PacketType), packetType) + " len: " + dataLength.ToString());//
+                    
                     switch (packetType)
                     {
                         case PacketType.CHK_AP:
-                            var j = Utf8Json.JsonSerializer.Deserialize<dynamic>(jsonFromClient);
-                            string id = j["id"]; //TODO get id from JSON
+                            dynamic j = Utf8Json.JsonSerializer.Deserialize<dynamic>(jsonFromClient);
+                            string id = j["id"];
                             var actionpointWorker = new MainThreadUpdateWorker()
                             {
                                 action = () =>
@@ -165,7 +167,7 @@ public class WAPIClient
                             {
                                 action = () => {
                                     string ret = "[";
-                                    foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))//TODO FIX BUG IN ARRAY
+                                    foreach (var obj in GameObject.FindGameObjectsWithTag("Checkpoint"))
                                         ret += "{\"id\":\"" + obj.GetComponent<CheckpointController>().id + "\",reached:" + obj.GetComponent<CheckpointController>().reached + "},";
                                     EnqueuePacket(PacketType.GET_CPS, packetFlag, ret + "]");
                                 }
@@ -194,11 +196,7 @@ public class WAPIClient
                             EnqueuePacket(PacketType.GET_SENS, packetFlag, JsonSerializer.ToJsonString(rc.allSensors.Get()));
                             break;
                         case PacketType.PING:
-                            JSON.Ping ping = JsonSerializer.Deserialize<JSON.Ping>(jsonFromClient);
-                            long clientTimestamp = ping.timestamp;
-                            ping.timestamp = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
-                            ping.ping = ping.timestamp - clientTimestamp;
-                            EnqueuePacket(PacketType.PING, packetFlag, JsonSerializer.ToJsonString(ping));
+                            EnqueuePacket(PacketType.PING, packetFlag, jsonFromClient);
                             break;
                         case PacketType.GET_DETE:
                             JSON.Detection detection = new JSON.Detection();
@@ -241,23 +239,6 @@ public class WAPIClient
                                 action = () =>
                                 {
                                     byte[] map = simulationControllerInstance.GetVideo();
-                                    /*  UnityEngine.Rendering.AsyncGPUReadback.Request(new ComputeBuffer(1,1), (req) =>
-                                      {
-                                          int w = 1280, h = 720;
-                                          var newTex = new Texture2D
-                                          (
-                                              w,
-                                              h,
-                                              TextureFormat.RGB24,
-                                              false
-                                          );
-
-                                          newTex.LoadRawTextureData(req.GetData<uint>());
-
-                                          newTex.Apply();
-
-                                          map = ImageConversion.EncodeToPNG(newTex);
-                                      });*/
                                     EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map, map.Length, false);
                                 }
                             };
@@ -309,7 +290,7 @@ public class WAPIClient
         stream.Write(BitConverter.GetBytes(length), 0, 4);
         stream.Write(bytes, 0, length);
         if (!packetFlag.HasFlag(Flag.DO_NOT_LOG_PACKET))
-            Debug.Log(Enum.GetName(typeof(PacketType), packetType) + " len: " + length.ToString());
+            Debug.Log("Sent " + Enum.GetName(typeof(PacketType), packetType) + " len: " + length.ToString());
     }
 
     public void Stop()
@@ -332,6 +313,4 @@ public class WAPIClient
         while (ret == -1);
         return (byte)ret;
     }
-
-   
 }
