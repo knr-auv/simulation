@@ -97,7 +97,7 @@ public class WAPIClient
         stream.ReadTimeout = 1000 * 60 * 5;//TODO change timeout?
         byte[] dataLenBytes = new byte[4];
         string jsonFromClient = "";
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         RobotController rc = simulationControllerInstance.robotController;
         try
         {

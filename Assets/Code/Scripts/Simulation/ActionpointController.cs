@@ -14,15 +14,15 @@ public class ActionpointController : MonoBehaviour
     void OnTriggerStay(Collider other)
     {
         if (other.tag != "Robot") return;
+        if(!active)Debug.Log("activepoint " + id + " active");
         active = true;
-        Debug.Log("activepoint " + id + " active");
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.tag != "Robot") return;
         active = false;
-        Debug.Log("activepoint " + id + " inactive");
+        if(!active)Debug.Log("activepoint " + id + " inactive");
     }
 
     public void OnDrawGizmosSelected()
