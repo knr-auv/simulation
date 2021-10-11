@@ -24,6 +24,13 @@ public class RobotController : MonoBehaviour
 
     public ConcurrentQueue<Action> operations;
 
+    [SerializeField] private float p = 0;
+    [SerializeField] private float i = 0;
+    [SerializeField] private float d = 0;
+    [SerializeField] private float k = 0;
+    [SerializeField] private float t = 90;
+    public PID tiltController;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -43,6 +50,7 @@ public class RobotController : MonoBehaviour
         motorBLV = new Motor(this) { position = new Vector3(-0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = true };
         motorFRV = new Motor(this) { position = new Vector3(0.1709f, 0f, 0.1195f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = false };
         motorBRV = new Motor(this) { position = new Vector3(0.1709f, 0f, -0.0963f), rotation = Quaternion.Euler(new Vector3(-90f, 0f, 0f)), isClockwise = false };
+        tiltController = new PID(0.1f, 0f, 0f, 1f, 10);
     }
 
     void FixedUpdate()
@@ -52,6 +60,20 @@ public class RobotController : MonoBehaviour
             operations.TryDequeue(out Action action);
             action.Invoke();
         }
+
+        tiltController.pCoef = p;
+        tiltController.iCoef = i;
+        tiltController.dCoef = d;
+        tiltController.kCoef = k;
+        float tilt = gameObject.transform.rotation.eulerAngles.y;
+        float control = tiltController.Control(t, tilt, Time.fixedTime);
+        motorFLH.fill = control;
+        motorFRH.fill = -control;
+        motorBLH.fill = -control;
+        motorBRH.fill = control;
+       // Debug.Log(Math.Round(tilt) + " " + Math.Round(t) + " " + Math.Round(control*100));
+        Debug.Log(gameObject.transform.rotation.eulerAngles.x + " " + gameObject.transform.rotation.eulerAngles.y + " " + gameObject.transform.rotation.eulerAngles.z);
+            
         Module.FixedUpdateAll();
     }
 

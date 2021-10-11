@@ -50,6 +50,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Code\Scripts\Simulation\Robot\PID.cs" />
      <Compile Include="Assets\Design\Scenes\SampleScenes\Scripts\LevelReset.cs" />
      <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
      <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetGeneratorController.cs" />
