@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1084366588721802053}
   - component: {fileID: 7401946105798267594}
   - component: {fileID: 8123826779265509938}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: NoGoZone
   m_TagString: NoGoZone
   m_Icon: {fileID: 0}

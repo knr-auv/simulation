@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8097394346149766703}
   - component: {fileID: 8097394346149766700}
   - component: {fileID: 8097394346149766701}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Actionpoint
   m_TagString: Actionpoint
   m_Icon: {fileID: 0}

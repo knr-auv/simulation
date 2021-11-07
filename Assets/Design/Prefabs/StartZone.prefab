@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3874488845483551061}
   - component: {fileID: 1056178626789546708}
   - component: {fileID: 3363073076815696054}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: StartZone
   m_TagString: StartZone
   m_Icon: {fileID: 0}

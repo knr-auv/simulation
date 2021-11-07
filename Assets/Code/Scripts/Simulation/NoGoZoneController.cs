@@ -12,7 +12,7 @@ public class NoGoZoneController : MonoBehaviour
         if (collider.tag != "Robot") return;
         Debug.Log("entered " + id + "NoGoZone");
         GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().PlaceRobotInStartZone();
-        GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().SendToClients(WAPIClient.PacketType.HIT_NGZ, WAPIClient.Flag.None, "{\"id\":\"" + id + "\"}");
+        GameObject.FindGameObjectWithTag("SimulationController").GetComponent<SimulationController>().SendToClients(WAPIClient.PacketType.HIT_NGZ, WAPIClient.Flag.None, id);
     }
     public void OnDrawGizmosSelected()
     {

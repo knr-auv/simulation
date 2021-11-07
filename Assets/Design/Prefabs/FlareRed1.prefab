@@ -238,7 +238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isWaterContainer: 0
   isCamera: 0
-  includeInDataset: 0
+  includeInDataset: 1
   center: {x: 0, y: 0.01, z: 0}
   size: {x: 0.1, y: 1, z: 0.1}
   BoundarySize: {x: 0.1, y: 1, z: 0.1}

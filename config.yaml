@@ -6,7 +6,7 @@ simulationOptions:
   videoQuality: 60
   selectedWaterContainer: level1
   selectedRandomObjects: []
-  fixedDeltaTime: 0.05
+  fixedDeltaTime: 0.01
   depthMapQuality: 100
   depthMapScale: 1
   videoFeedQuality: 50

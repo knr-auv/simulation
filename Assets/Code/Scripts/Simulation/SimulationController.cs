@@ -12,6 +12,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
+using Utf8Json;
 using static WAPIClient;
 
 public class SimulationController : MonoBehaviour
@@ -111,6 +112,7 @@ public class SimulationController : MonoBehaviour
 
         wapiThread = new Thread(WAPIRecv) { IsBackground = true };
         wapiThread.Start();
+        JsonSerializer.ToJsonString(GetDetection()); //No idea why first first call takes 1 second, leave it for performance
     }
 
     public void PlaceRobotInStartZone()
@@ -258,14 +260,13 @@ public class SimulationController : MonoBehaviour
         return colorBytes;
     }
 
-    public JSON.Detection GetDetection()
+    public List<JSON.DetectedObject> GetDetection()
     {
         var detector = new Detector();
-        JSON.Detection detection = new JSON.Detection();
-        detection.detected = new List<JSON.DetectedObject>();
+        var detected = new List<JSON.DetectedObject>();
         foreach (var info in detector.Detect(Camera.main))
         {
-            if(info.includeInDataset)detection.detected.Add(new JSON.DetectedObject()
+            if(info.includeInDataset)detected.Add(new JSON.DetectedObject()
             {
                 visibleInFrame = info.visible,
                 min = new JSON.Vec2() { x = info.min.x, y = info.min.y },
@@ -276,7 +277,7 @@ public class SimulationController : MonoBehaviour
                 colorPercentVisible = info.colorPercentVisible
             });
         }
-        return detection;
+        return detected;
     }
 
     void SetGraphics()
@@ -313,6 +314,10 @@ public class SimulationController : MonoBehaviour
         Debug.Log("acceptNewClients = false");
     }
 
+    public void SendToClients(PacketType packetType, Flag packetFlag)
+    {
+        foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag);
+    }
     public void SendToClients(PacketType packetType, Flag packetFlag, string json)
     {
         foreach (KeyValuePair<int, WAPIClient> item in wapiClients) item.Value.EnqueuePacket(packetType, packetFlag, json);

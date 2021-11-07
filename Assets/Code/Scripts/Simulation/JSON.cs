@@ -4,6 +4,35 @@ using UnityEngine;
 
 public class JSON : MonoBehaviour
 {
+    public class PID
+    {
+        public float p, i, d, windupCap, gain, limit;
+    }
+
+    public class PIDs
+    {
+        public PID roll = new PID();
+        public PID pitch = new PID();
+        public PID yaw = new PID();
+        public PID depth = new PID();
+        public PID rollSpeed = new PID();
+        public PID pitchSpeed = new PID();
+        public PID yawSpeed = new PID();
+    }
+    
+    public class AcroOptions
+    {
+        public Vec3 rot_speed = new Vec3();
+        public Vec3 vel = new Vec3();
+    }
+    
+    public class StableOptions
+    {
+        public Vec3 rot = new Vec3();
+        public Vec3 vel = new Vec3();
+        public float depth = 0;
+    }
+    
     public class Motors
     {
         public float FLH, FLV, BLV, BLH, FRH, FRV, BRV, BRH;
@@ -11,31 +40,11 @@ public class JSON : MonoBehaviour
 
     public class Sensors
     {
-        public Gyro gyro = new Gyro();
-        public Rot_speed rot_speed = new Rot_speed();
-        public Accel accel = new Accel();
-        public Angular_accel angular_accel = new Angular_accel();
+        public Vec3 gyro = new Vec3();
+        public Vec3 rot_speed = new Vec3();
+        public Vec3 accel = new Vec3();
+        public Vec3 angular_accel = new Vec3();
         public Baro baro = new Baro();
-    }
-
-    public class Gyro
-    {
-        public float x, y, z;
-    }
-
-    public class Accel
-    {
-        public float x, y, z;
-    }
-
-    public class Rot_speed
-    {
-        public float x, y, z;
-    }
-
-    public class Angular_accel
-    {
-        public float x, y, z;
     }
 
     public class Baro
@@ -56,27 +65,13 @@ public class JSON : MonoBehaviour
 
     public class Orientation
     {
-        public Rot rot = new Rot();
-        public Pos pos = new Pos();
+        public Vec3 rot = new Vec3();
+        public Vec3 pos = new Vec3();
     }
-    public class Rot
-    {
-        public float x, y, z;
-    }
-
-    public class Pos
-    {
-        public float x, y, z;
-    }
-
+    
     public class Ping
     {
         public long timestamp, ping;
-    }
-
-    public class Init
-    {
-        public int videoPort, jsonPort, quality;
     }
 
     public class Detection
@@ -97,5 +92,10 @@ public class JSON : MonoBehaviour
     public class Vec2
     {
         public float x, y;
+    }
+    
+    public class Vec3
+    {
+        public float x, y, z;
     }
 }
