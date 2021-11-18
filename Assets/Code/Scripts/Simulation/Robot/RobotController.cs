@@ -64,6 +64,20 @@ public class RobotController : MonoBehaviour
         yawSpeedPID = new PID(1f, 0.1f, 0.05f, 1f, 1, .5f);
         JsonSerializer.ToJsonString<JSON.PIDs>(new JSON.PIDs()); //No idea why first first call takes 1 second, leave it for performance
     }
+    
+    public static Quaternion ShortestRotation(Quaternion a, Quaternion b)
+    {
+        if (Quaternion.Dot(a, b) < 0)
+        {
+            return a * Quaternion.Inverse(Multiply(b, -1));
+        }
+        else return a * Quaternion.Inverse(b);
+    }
+
+    public static Quaternion Multiply(Quaternion input, float scalar)
+    {
+        return new Quaternion(input.x * scalar, input.y * scalar, input.z * scalar, input.w * scalar);
+    }
 
     void FixedUpdate()
     {
@@ -77,21 +91,6 @@ public class RobotController : MonoBehaviour
         {
             if (motorsControlMode == "stable")
             {
-                /*
-                 * public static Quaternion ShortestRotation(Quaternion a, Quaternion b)
-                    {
-	                    if (Quaternion.Dot(a, b) < 0)
-	                    {
-		                    return a * Quaternion.Inverse(Multiply(b, -1));
-	                    }
-	                    else return a * Quaternion.Inverse(b);
-                    }
-
-                    public static Quaternion Multiply(Quaternion input, float scalar)
-                    {
-	                    return new Quaternion(input.x * scalar, input.y * scalar, input.z * scalar, input.w * scalar);
-                    }
-                 */
                 float t = 50;
                 var target = Quaternion.Euler(targetRotation);
                 if (Quaternion.Dot(gameObject.transform.rotation , target) < 0)
@@ -171,7 +170,7 @@ public class RobotController : MonoBehaviour
             x = x > 1f ? 1f : x < -1f ? -1f : x;
             x = Map(x, -1f, 1f, -4.752412520000007f, 4.752412520000007f);
             if (x < 0) ret = Inverse(x, -0.0000180414f, 0.0591933468f, -48.035f-x, false);
-            else ret= Inverse(x, 0.0000281376f, -0.0799177935f, 56.449759077f-x, true);
+            else ret = Inverse(x, 0.0000281376f, -0.0799177935f, 56.449759077f-x, true);
             return Map(ret, 1100f, 1900f, -1f, 1f);
         }
 
@@ -220,6 +219,7 @@ public class RobotController : MonoBehaviour
         motorBLV.fill = GetFill(motorBLV.fill);
         motorBRV.fill = GetFill(motorBRV.fill);
     }
+    
     private float Map(float x, float a, float b, float c, float d) => c + (x - a) * (d - c) / (b - a);
     private void OnDrawGizmos()
     {
@@ -379,10 +379,10 @@ public class AllSensors : Module
     public AllSensors(RobotController _rc) : base(_rc) {
         sensors = new JSON.Sensors();
         sensors.baro = rc.barometer.baro;
-        sensors.gyro = rc.gyroscpe.gyro;
+        sensors.rot = rc.gyroscpe.gyro;
         sensors.accel = rc.accelerometer.accel;
-        sensors.angular_accel = rc.gyroscpe.angularAccel;
-        sensors.rot_speed = rc.gyroscpe.rotSpeed;
+        sensors.angularAccel = rc.gyroscpe.angularAccel;
+        sensors.rotSpeed = rc.gyroscpe.rotSpeed;
     }
 
     public JSON.Sensors Get() => sensors;

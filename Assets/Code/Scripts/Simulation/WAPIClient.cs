@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Timers;
+using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 using Timer = System.Timers.Timer;
 
@@ -31,7 +32,6 @@ public class WAPIClient
         GET_VIDEO_BYTES = 0xB3,
         SET_SIM = 0xC0,
         ACK = 0xC1,
-        GET_ORIEN = 0xC2,
         SET_ORIEN = 0xC3,
         RST_SIM = 0xC4,
         PING = 0xC5,
@@ -120,7 +120,6 @@ public class WAPIClient
         }
     }
 
-
     private void HandleJsonClient()
     {
         stream = client.GetStream();
@@ -169,7 +168,16 @@ public class WAPIClient
                             }
                             else
                             {
-                                //TODO
+                                var motors = new JSON.Motors();
+                                motors.FLH = rc.motorFLH.fill;
+                                motors.FLV = rc.motorFLV.fill;
+                                motors.BLV = rc.motorBLV.fill;
+                                motors.BLH = rc.motorBLH.fill;
+                                motors.FRH = rc.motorFRH.fill;
+                                motors.FRV = rc.motorFRV.fill;
+                                motors.BRV = rc.motorBRV.fill;
+                                motors.BRH = rc.motorBRH.fill;
+                                EnqueuePacket(PacketType.SET_MTR, packetFlag, JsonSerializer.ToJsonString(motors));
                             }
                             break;
                         case PacketType.ARM_MTR:
@@ -183,13 +191,27 @@ public class WAPIClient
                             else EnqueuePacket(PacketType.SET_CONTROL_MODE, packetFlag, rc.motorsControlMode);
                             break;
                         case PacketType.SET_ACRO:
-                            var acro = JsonSerializer.Deserialize<JSON.AcroOptions>(jsonFromClient);
-                            rc.targetRotationSpeed.x = acro.rot_speed.x;
-                            rc.targetRotationSpeed.y = acro.rot_speed.y;
-                            rc.targetRotationSpeed.z = acro.rot_speed.z;
-                            rc.velocity.x = acro.vel.x;
-                            rc.velocity.y = acro.vel.y;
-                            rc.velocity.z = acro.vel.z;
+                            if (dataLength != 0)
+                            {
+                                var acro = JsonSerializer.Deserialize<JSON.AcroOptions>(jsonFromClient);
+                                rc.targetRotationSpeed.x = acro.rotSpeed.x;
+                                rc.targetRotationSpeed.y = acro.rotSpeed.y;
+                                rc.targetRotationSpeed.z = acro.rotSpeed.z;
+                                rc.velocity.x = acro.vel.x;
+                                rc.velocity.y = acro.vel.y;
+                                rc.velocity.z = acro.vel.z;
+                            }
+                            else
+                            {
+                                var acro = new JSON.AcroOptions();
+                                acro.rotSpeed.x = rc.targetRotationSpeed.x;
+                                acro.rotSpeed.y = rc.targetRotationSpeed.y;
+                                acro.rotSpeed.z = rc.targetRotationSpeed.z;
+                                acro.vel.x = rc.velocity.x;
+                                acro.vel.y = rc.velocity.y;
+                                acro.vel.z = rc.velocity.z;
+                                EnqueuePacket(PacketType.SET_ACRO, packetFlag, JsonSerializer.ToJsonString(acro));
+                            }
                             break;
                         case PacketType.SET_STABLE:
                             if (dataLength != 0)
@@ -220,7 +242,6 @@ public class WAPIClient
                             if (dataLength != 0)
                             {
                                 var pids = JsonSerializer.Deserialize<JSON.PIDs>(jsonFromClient);
-                               
                                 rc.rollPID.SetValues(pids.roll);
                                 rc.pitchPID.SetValues(pids.pitch);
                                 rc.yawPID.SetValues(pids.yaw);
@@ -233,10 +254,8 @@ public class WAPIClient
                                 rc.pitchPID.GetValues(ref pids.pitch);
                                 rc.yawPID.GetValues(ref pids.yaw);
                                 rc.depthPID.GetValues(ref pids.depth);
-                                var str = JsonSerializer.ToJsonString<JSON.PIDs>(pids);
-                                EnqueuePacket(PacketType.SET_PID, packetFlag, str);
+                                EnqueuePacket(PacketType.SET_PID, packetFlag, JsonSerializer.ToJsonString<JSON.PIDs>(pids));
                             }
-                            
                             break;
                         
                         case PacketType.GET_SENS:
@@ -277,11 +296,9 @@ public class WAPIClient
                         case PacketType.ACK:
                             EnqueuePacket(PacketType.ACK, packetFlag | Flag.TEST, "{\"info\":\"ack ack\"}");
                             break;
-                        case PacketType.GET_ORIEN:
-                            EnqueuePacket(PacketType.GET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
-                            break;
                         case PacketType.SET_ORIEN:
-                            rc.orientation.Set(JsonSerializer.Deserialize<JSON.Orientation>(jsonFromClient));
+                            if (dataLength != 0) rc.orientation.Set(JsonSerializer.Deserialize<JSON.Orientation>(jsonFromClient));
+                            else EnqueuePacket(PacketType.SET_ORIEN, packetFlag, JsonSerializer.ToJsonString(rc.orientation.Get()));
                             break;
                         case PacketType.RST_SIM:
                             MainThreadUpdateWorker resetWorker = new MainThreadUpdateWorker()

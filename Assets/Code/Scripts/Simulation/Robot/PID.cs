@@ -1,7 +1,6 @@
 ﻿using System;
-using UnityEditor.Experimental.GraphView;
 
-    public class PID
+public class PID
     {
         public float pCoef, iCoef, dCoef, kCoef, tCoef;
         public float pTerm, iTerm, dTerm;
@@ -20,22 +19,6 @@ using UnityEditor.Experimental.GraphView;
             oldTime = 0;
             oldError = 0;
             iTerm = 0;
-        }
-        
-        public float Control(float target, float current, float time)
-        {
-            float error = target - current;
-            float dt = time - oldTime;
-
-            pTerm = error;
-            iTerm += error * dt;
-            iTerm = iTerm > windupCap ? windupCap : iTerm < -windupCap ? -windupCap : iTerm;
-            if (dt == 0) dTerm = 0;
-            else dTerm = (error - oldError) / dt;
-
-            oldError = error;
-            oldTime = time;
-            return (pCoef * pTerm + iCoef * iTerm + dCoef * dTerm) * kCoef;
         }
 
         public float ControlWithLimits(float target, float current, float time)
@@ -74,20 +57,6 @@ using UnityEditor.Experimental.GraphView;
             return pidCapped;
         }
         
-        public float ControlDt(float target, float current, float dt)
-        {
-            float error = target - current;
-
-            pTerm = error;
-            iTerm += error * dt;
-            iTerm = iTerm > windupCap ? windupCap : iTerm < -windupCap ? -windupCap : iTerm;
-            if (dt == 0) dTerm = 0;
-            else dTerm = (error - oldError) / dt;
-
-            oldError = error;
-            return (pCoef * pTerm + iCoef * iTerm + dCoef * dTerm) * kCoef;
-        }
-
         public void SetValues(JSON.PID options)
         {
             pCoef = options.p;
@@ -97,6 +66,7 @@ using UnityEditor.Experimental.GraphView;
             limit = options.limit;
             windupCap = options.windupCap;
         }
+        
         public void GetValues(ref JSON.PID options)
         {
             options.p = pCoef;

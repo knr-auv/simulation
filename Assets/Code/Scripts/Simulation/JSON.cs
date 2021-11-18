@@ -22,7 +22,7 @@ public class JSON : MonoBehaviour
     
     public class AcroOptions
     {
-        public Vec3 rot_speed = new Vec3();
+        public Vec3 rotSpeed = new Vec3();
         public Vec3 vel = new Vec3();
     }
     
@@ -40,10 +40,10 @@ public class JSON : MonoBehaviour
 
     public class Sensors
     {
-        public Vec3 gyro = new Vec3();
-        public Vec3 rot_speed = new Vec3();
+        public Vec3 rot = new Vec3();
+        public Vec3 rotSpeed = new Vec3();
         public Vec3 accel = new Vec3();
-        public Vec3 angular_accel = new Vec3();
+        public Vec3 angularAccel = new Vec3();
         public Baro baro = new Baro();
     }
 
