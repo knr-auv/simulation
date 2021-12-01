@@ -30,6 +30,7 @@ public class WAPIClient
         GET_DEPTH = 0xB1,
         GET_DEPTH_BYTES = 0xB2,
         GET_VIDEO_BYTES = 0xB3,
+        GET_VIDEO = 0xB4,
         SET_SIM = 0xC0,
         ACK = 0xC1,
         SET_ORIEN = 0xC3,
@@ -291,6 +292,16 @@ public class WAPIClient
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
+                            break;
+                        case PacketType.GET_VIDEO:
+                            MainThreadUpdateWorker videoWorker = new MainThreadUpdateWorker()
+                            {
+                                action = () => {
+                                    byte[] vid = simulationControllerInstance.GetVideo();
+                                    EnqueuePacket(PacketType.GET_VIDEO, packetFlag, System.Convert.ToBase64String(vid));
+                                }
+                            };
+                            simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(videoWorker);
                             break;
                         
                         case PacketType.ACK:

@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,7 +14,13 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using Utf8Json;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Linq; //"C:\Program Files\Unity\Editor\Data\MonoBleedingEdge\lib\mono\unityjit/*.dll"
+using System.Net.Mime;
+using System.Runtime.InteropServices;
 using static WAPIClient;
+using Random = UnityEngine.Random;
 
 public class SimulationController : MonoBehaviour
 {
@@ -57,7 +64,7 @@ public class SimulationController : MonoBehaviour
         QualitySettings.vSyncCount = 0;  // VSync must be disabled
         Application.targetFrameRate = 35;
         
-
+        
         mainThreadUpdateWorkers = new ConcurrentQueue<MainThreadUpdateWorker>();
         if (Settings.config == null || Settings.config.mode == null)
         {
@@ -152,27 +159,16 @@ public class SimulationController : MonoBehaviour
 
     IEnumerator StartCapture()
     {
-        yield return new WaitForSeconds(2);
-        if (robotController.depthCamera.targetTexture.width !=
-            (int) Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale))
-        {
-            if (robotController.depthCamera.targetTexture != null) robotController.depthCamera.activeTexture.Release();
-            robotController.depthCamera.targetTexture = new RenderTexture(
-                (int) Mathf.Round(1280 * Settings.config.simulationOptions.depthMapScale),
-                (int) Mathf.Round(720 * Settings.config.simulationOptions.depthMapScale), 24);
-        }
-
-        if (robotController.colorCamera.targetTexture.width !=
-            (int) Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale))
-        {
-            if (robotController.colorCamera.targetTexture != null) robotController.colorCamera.activeTexture.Release();
-            robotController.colorCamera.targetTexture = new RenderTexture(
-                (int) Mathf.Round(1280 * Settings.config.simulationOptions.videoFeedScale),
-                (int) Mathf.Round(720 * Settings.config.simulationOptions.videoFeedScale), 24);
-        }
-
-        yield return new WaitUntil(() =>
-            robotController.depthCamera.activeTexture != null && robotController.depthCamera.activeTexture != null);
+        yield return new WaitUntil(() => robotController && robotController.depthCamera.targetTexture && robotController.colorCamera.targetTexture);
+        float depthScale = Settings.config.simulationOptions.depthMapScale;
+        float videoScale = Settings.config.simulationOptions.videoFeedScale;
+        
+        if (robotController.depthCamera.targetTexture != null) robotController.depthCamera.activeTexture.Release();
+        robotController.depthCamera.targetTexture = new RenderTexture((int) Mathf.Round(1280 * depthScale), (int) Mathf.Round(720 * depthScale), 32, RenderTextureFormat.BGRA32);
+        if (robotController.colorCamera.targetTexture != null) robotController.colorCamera.activeTexture.Release();
+        robotController.colorCamera.targetTexture = new RenderTexture( (int) Mathf.Round(1280 * videoScale), (int) Mathf.Round(720 * videoScale), 32, RenderTextureFormat.BGRA32);
+        
+        yield return new WaitUntil(() => robotController.depthCamera.activeTexture != null && robotController.depthCamera.activeTexture != null);
 
         Texture2D texColor, texDepth;
         AsyncGPUReadbackRequest requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
@@ -180,27 +176,91 @@ public class SimulationController : MonoBehaviour
         yield return new WaitUntil(() => requestColor.done && requestDepth.done);
         texColor = new Texture2D(requestColor.width, requestColor.height, TextureFormat.RGBA32, false);
         texDepth = new Texture2D(requestDepth.width, requestDepth.height, TextureFormat.RGBA32, false);
-         
+        
+        
+        ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+        System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+        EncoderParameters myEncoderParameters = new EncoderParameters(1);
+        EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 30L);
+        myEncoderParameters.Param[0] = myEncoderParameter;
+        
+        System.Drawing.Imaging.Encoder myEncoder2 = System.Drawing.Imaging.Encoder.Quality;
+        EncoderParameters myEncoderParameters2 = new EncoderParameters(1);
+        EncoderParameter myEncoderParameter2 = new EncoderParameter(myEncoder, 100L);
+        myEncoderParameters2.Param[0] = myEncoderParameter2;
+        
+        Stream stream = new MemoryStream();
+        Bitmap depthBmp = new Bitmap( requestDepth.width, requestDepth.height, PixelFormat.Format32bppArgb); 
+        Bitmap videoBmp = new Bitmap( requestColor.width, requestColor.height, PixelFormat.Format32bppArgb);
+        
         while (true)
         {
-            requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
             requestDepth = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.depthCamera.activeTexture);
-            yield return new WaitUntil(() => requestColor.done && requestDepth.done);
-            if (!requestColor.hasError)
-            {
-                texColor.LoadRawTextureData(requestColor.GetData<byte>()); //TODO mayby EncodeNativeArrayToJPG
-                colorBytes = texColor.EncodeToJPG(Settings.config.simulationOptions.videoFeedQuality);
-            }
+            requestColor = UnityEngine.Rendering.AsyncGPUReadback.Request(robotController.colorCamera.activeTexture);
+
+            yield return new WaitUntil(() => requestDepth.done);
             if (!requestDepth.hasError)
             {
-                texDepth.LoadRawTextureData(requestDepth.GetData<byte>());
-                depthBytes = texDepth.EncodeToJPG(Settings.config.simulationOptions.depthMapQuality);
+                byte[] arr = requestDepth.GetData<byte>().ToArray();
+                BitmapData bmpData = depthBmp.LockBits(
+                    new Rectangle(0, 0, depthBmp.Width, depthBmp.Height),   
+                    ImageLockMode.ReadWrite, depthBmp.PixelFormat);
+                Marshal.Copy(arr, 0, bmpData.Scan0, arr.Length);
+                depthBmp.UnlockBits(bmpData);
+                depthBmp.RotateFlip(RotateFlipType.RotateNoneFlipY );
+                
+                stream.SetLength(0);
+                depthBmp.Save(stream, jpgEncoder, myEncoderParameters2);
+                
+                int len = (int)stream.Length;
+                var buffer = new byte[len];
+                stream.Position = 0;
+                int read = stream.Read(buffer, 0, len);
+                if(len - read != 0)Debug.LogError("Wrong len read JPEG");
+                depthBytes = buffer;
+            }
+            
+            yield return new WaitUntil(() => requestColor.done);
+            if (!requestColor.hasError)
+            {
+                byte[] arr = requestColor.GetData<byte>().ToArray();
+                BitmapData bmpData = videoBmp.LockBits(
+                    new Rectangle(0, 0, videoBmp.Width, videoBmp.Height),   
+                    ImageLockMode.ReadWrite, videoBmp.PixelFormat);
+                Marshal.Copy(arr, 0, bmpData.Scan0, arr.Length);
+                videoBmp.UnlockBits(bmpData);
+                videoBmp.RotateFlip(RotateFlipType.RotateNoneFlipY );
+                
+                stream.SetLength(0);
+                videoBmp.Save(stream, jpgEncoder, myEncoderParameters);
+                
+                int len = (int)stream.Length;
+                var buffer = new byte[len];
+                stream.Position = 0;
+                int read = stream.Read(buffer, 0, len);
+                if(len - read != 0)Debug.LogError("Wrong len read JPEG");
+                colorBytes = buffer;
             }
         }
     }
+    
+    
+    private ImageCodecInfo GetEncoder(ImageFormat format)
+    {
 
+        ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+
+        foreach (ImageCodecInfo codec in codecs)
+        {
+            if (codec.FormatID == format.Guid)
+            {
+                return codec;
+            }
+        }
+        return null;
+    }
     public volatile byte[] colorBytes, depthBytes;
-
+    private NativeArray<byte> arr = new NativeArray<byte>();
     void Update()
     {
         while (mainThreadUpdateWorkers.Count > 0)
@@ -208,6 +268,12 @@ public class SimulationController : MonoBehaviour
             mainThreadUpdateWorkers.TryDequeue(out MainThreadUpdateWorker worker);
             worker.action.Invoke();
             worker.done = true; 
+        }
+
+        if (Application.targetFrameRate != 65)
+        {
+            QualitySettings.vSyncCount = 0; // VSync must be disabled
+            Application.targetFrameRate = 65;
         }
     }
 
