@@ -4,7 +4,7 @@ simulationOptions:
   videoPort: 44209
   webAPIPort: 44210 
   videoQuality: 60
-  selectedWaterContainer: level1
+  selectedWaterContainer: sauvc1
   selectedRandomObjects: []
   fixedDeltaTime: 0.01
   depthMapQuality: 100

@@ -45,7 +45,8 @@ public class WAPIClient
         REC_ST = 0xD1,
         REC_RST = 0xD2,
         GET_REC = 0xD3,
-        GET_DETE = 0xDE
+        GET_DETE = 0xDE,
+        TORPEDO = 0xE0
     }
 
     [Flags]
@@ -267,7 +268,7 @@ public class WAPIClient
                             {
                                 action = () => {
                                     byte[] map = simulationControllerInstance.GetDepthMap();
-                                    EnqueuePacket(PacketType.GET_DEPTH, packetFlag, System.Convert.ToBase64String(map));
+                                    EnqueuePacket(PacketType.GET_DEPTH, packetFlag, System.Convert.ToBase64String(map, 0, simulationControllerInstance.GetDepthMapLength()));
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
@@ -277,7 +278,7 @@ public class WAPIClient
                             {
                                 action = () => {
                                     byte[] map = simulationControllerInstance.GetDepthMap();
-                                    EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map, map.Length, false);
+                                    EnqueuePacket(PacketType.GET_DEPTH_BYTES, packetFlag, map, simulationControllerInstance.GetDepthMapLength(), false);
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
@@ -288,7 +289,7 @@ public class WAPIClient
                                 action = () =>
                                 {
                                     byte[] map = simulationControllerInstance.GetVideo();
-                                    EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map, map.Length, false);
+                                    EnqueuePacket(PacketType.GET_VIDEO_BYTES, packetFlag, map, simulationControllerInstance.GetVideoLength(), false);
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(depthWorker);
@@ -298,7 +299,7 @@ public class WAPIClient
                             {
                                 action = () => {
                                     byte[] vid = simulationControllerInstance.GetVideo();
-                                    EnqueuePacket(PacketType.GET_VIDEO, packetFlag, System.Convert.ToBase64String(vid));
+                                    EnqueuePacket(PacketType.GET_VIDEO, packetFlag, System.Convert.ToBase64String(vid, 0, simulationControllerInstance.GetVideoLength()));
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(videoWorker);
@@ -382,6 +383,9 @@ public class WAPIClient
                                 }
                             };
                             simulationControllerInstance.mainThreadUpdateWorkers.Enqueue(detectionWorker);
+                            break;
+                        case PacketType.TORPEDO:
+                            rc.SendTorpedo();
                             break;
                         
                         case (PacketType)0xFF:

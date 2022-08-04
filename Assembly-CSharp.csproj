@@ -60,6 +60,7 @@
      <Compile Include="Assets\Code\Scripts\Simulation\WAPIClient.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\FinishZoneController.cs" />
      <Compile Include="Assets\Code\Scripts\Utility\Config.cs" />
+     <Compile Include="Assets\Code\Scripts\Simulation\ExplosionController.cs" />
      <Compile Include="Assets\Code\Scripts\DatasetGeneration\DetectionRectDraw.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\WaterBehaviour.cs" />
      <Compile Include="Assets\Code\Scripts\Start\LoggerController.cs" />
@@ -79,6 +80,7 @@
      <Compile Include="Assets\Design\Scenes\SampleScenes\Menu\Scripts\MenuSceneLoader.cs" />
      <Compile Include="Assets\Design\Scenes\SampleScenes\Scripts\PlaceTargetWithMouse.cs" />
      <Compile Include="Assets\Code\Scripts\Utility\Settings.cs" />
+     <Compile Include="Assets\Code\Scripts\Simulation\TorpedoController.cs" />
      <Compile Include="Assets\Code\Scripts\DatasetGeneration\DatasetObjectInfo.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\JSON.cs" />
      <Compile Include="Assets\Code\Scripts\Simulation\Robot\RobotController.cs" />
@@ -98,7 +100,6 @@
      <None Include="Assets\Packages\YamlDotNet.11.1.1\lib\net45\YamlDotNet.xml" />
      <None Include="Assets\Packages\System.Memory.4.5.4\lib\net461\System.Memory.xml" />
      <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.4.5.3\useSharedDesignerContext.txt" />
-     <None Include="Assets\Packages\System.Drawing.Common.6.0.0\lib\net461\System.Drawing.Common.xml" />
      <None Include="Assets\Packages\Microsoft.NETCore.Targets.1.1.0\dotnet_library_license.txt" />
      <None Include="Assets\Packages\System.Threading.Tasks.4.3.0\ThirdPartyNotices.txt" />
      <None Include="Assets\Packages\System.Threading.Tasks.4.3.0\dotnet_library_license.txt" />
@@ -107,7 +108,6 @@
      <None Include="Assets\Packages\System.ValueTuple.4.4.0\useSharedDesignerContext.txt" />
      <None Include="Assets\Packages\System.IO.4.3.0\dotnet_library_license.txt" />
      <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.4.5.3\version.txt" />
-     <None Include="Assets\Packages\System.Drawing.Common.6.0.0\useSharedDesignerContext.txt" />
      <None Include="Assets\Packages\System.Buffers.4.5.1\useSharedDesignerContext.txt" />
      <None Include="Assets\Packages\System.ValueTuple.4.4.0\version.txt" />
      <None Include="Assets\Packages\System.Text.Encoding.4.3.0\dotnet_library_license.txt" />
@@ -337,8 +337,8 @@
  <Reference Include="UnityEditor">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
  </Reference>
- <Reference Include="System.Drawing.Common">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.Common.dll</HintPath>
+ <Reference Include="System.Drawing">
+ <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="System.Buffers">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/System.Buffers.4.5.1/lib/net461/System.Buffers.dll</HintPath>
@@ -357,9 +357,6 @@
  </Reference>
  <Reference Include="YamlDotNet">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/YamlDotNet.11.1.1/lib/net45/YamlDotNet.dll</HintPath>
- </Reference>
- <Reference Include="System.Drawing">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>

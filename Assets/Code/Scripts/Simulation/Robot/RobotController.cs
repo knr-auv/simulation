@@ -15,6 +15,8 @@ public class RobotController : MonoBehaviour
     [SerializeField] public Vector3 checkerRotation;
     public Rigidbody rb;
 
+    [SerializeField] public GameObject torpedo;
+    
     public Motor motorFLH, motorFLV, motorBLV, motorBLH, motorFRH, motorFRV, motorBRV, motorBRH;
     public Accelerometer accelerometer;
     public Gyroscope gyroscpe;
@@ -25,7 +27,7 @@ public class RobotController : MonoBehaviour
 
     public ConcurrentQueue<Action> operations;
     
-    public bool motorsArmed = true;
+    public bool motorsArmed = false;
     public string motorsControlMode = "stable";
     public PID pitchPID, rollPID, yawPID, depthPID;
     public Vector3 targetRotationSpeed = Vector3.zero;
@@ -125,6 +127,14 @@ public class RobotController : MonoBehaviour
         }
 
         Module.FixedUpdateAll();
+    }
+
+    public void SendTorpedo()
+    {
+        operations.Enqueue(() =>
+        {
+            Instantiate(torpedo, transform.TransformPoint(new Vector3(0,-0.04f,0.2f)), transform.rotation);
+        });
     }
 
     public void SetRawMotors(float FLH, float FLV, float BLV, float BLH, float FRH, float FRV, float BRV, float BRH)

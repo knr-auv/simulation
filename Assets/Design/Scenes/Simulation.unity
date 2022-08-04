@@ -184,6 +184,7 @@ MonoBehaviour:
   - {fileID: 2677716390902683653, guid: f725f18564a1d964dbde6305379556ca, type: 3}
   - {fileID: 5455729281327230713, guid: c6bcc9e75139fff4bbcac193d5258b81, type: 3}
   - {fileID: 8822704632882775983, guid: 2b447fa14ecbf4643851ba8d988bc242, type: 3}
+  - {fileID: 4970177127550745795, guid: 8c3f4182792351c42a0df7c9a4008f9f, type: 3}
   robotPrefab: {fileID: 3346525046335329387, guid: 51a85fe07c6400945aa11b56961668c6, type: 3}
   robotController: {fileID: 0}
   depthMapBytes: 
@@ -192,6 +193,8 @@ MonoBehaviour:
   acceptNewClients: 0
   colorBytes: 
   depthBytes: 
+  colorBytesLength: 0
+  depthBytesLength: 0
 --- !u!1 &437292842
 GameObject:
   m_ObjectHideFlags: 0

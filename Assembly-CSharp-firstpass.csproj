@@ -399,8 +399,8 @@
  <Reference Include="UnityEditor">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
  </Reference>
- <Reference Include="System.Drawing.Common">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.Common.dll</HintPath>
+ <Reference Include="System.Drawing">
+ <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="System.Buffers">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/System.Buffers.4.5.1/lib/net461/System.Buffers.dll</HintPath>
@@ -419,9 +419,6 @@
  </Reference>
  <Reference Include="YamlDotNet">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/YamlDotNet.11.1.1/lib/net45/YamlDotNet.dll</HintPath>
- </Reference>
- <Reference Include="System.Drawing">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>

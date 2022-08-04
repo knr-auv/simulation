@@ -293,8 +293,8 @@
  <Reference Include="UnityEditor.WindowsStandalone.Extensions">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.1.3f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
  </Reference>
- <Reference Include="System.Drawing.Common">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.Common.dll</HintPath>
+ <Reference Include="System.Drawing">
+ <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="NugetForUnity">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/NuGet/Editor/NugetForUnity.dll</HintPath>
@@ -316,9 +316,6 @@
  </Reference>
  <Reference Include="YamlDotNet">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/Packages/YamlDotNet.11.1.1/lib/net45/YamlDotNet.dll</HintPath>
- </Reference>
- <Reference Include="System.Drawing">
- <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Assets/System.Drawing.dll</HintPath>
  </Reference>
  <Reference Include="nunit.framework">
  <HintPath>E:/DATA/[Data]/Repozytoria/simulation/Library/PackageCache/com.unity.ext.nunit@1.0.0/net35/unity-custom/nunit.framework.dll</HintPath>
