@@ -1321,7 +1321,7 @@ MonoBehaviour:
   checkerRotation: {x: 0, y: 0, z: 0}
   rb: {fileID: 3346525046335329385}
   torpedo: {fileID: 1180857978982734801, guid: bbc22cf209aa63f4fb576a5b9badb387, type: 3}
-  motorsArmed: 1
+  motorsArmed: 0
   motorsControlMode: stable
   targetRotationSpeed: {x: 0, y: 0, z: 0}
   targetRotation: {x: 0, y: 0, z: 0}
