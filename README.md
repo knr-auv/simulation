@@ -1,5 +1,5 @@
 # AUV Virtual Environment 2.0
-Okoń AUV Virtual Environment 2.0 is built in [Unity](https://unity.com/) 2020.1.3f1. Simulates behaviour of the Okon. It's an AUV built by [KNR](http://knr.meil.pw.edu.pl/). VE includes:
+Okoń AUV Virtual Environment 2.0 is built in [Unity](https://unity.com/) 2020.1.3f1. Simulates behaviour of the [Okoń robot](https://knr.edu.pl/project/okon/). It's an AUV built by [KNR](https://knr.edu.pl). VE includes:
 - underwater shaders
     - color correction
     - physical camera setup
